@@ -1,0 +1,4 @@
+# Deep answers, walkthrough plans, whole documents.
+FROM llama3.3:70b
+PARAMETER num_ctx 16384
+PARAMETER temperature 0.3

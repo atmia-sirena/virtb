@@ -105,7 +105,7 @@ export interface PipSettings {
 export const defaultSettings: PipSettings = {
   voice: { voiceName: "af_heart", speed: 1, language: "auto" },
   speech: { asrModel: "parakeet-tdt-0.6b-v3", ttsModel: "kokoro-v1.0", threads: 4 },
-  shortcuts: { talk: "Ctrl+Win (hold)", dictate: "RightCtrl (hold)", textMode: "Ctrl (double-tap)" },
+  shortcuts: { talk: "Ctrl+Win (hold)", dictate: "RightCtrl (hold)", textMode: "LeftCtrl (double-tap)" },
   dictation: { cleanup: true, skipCleanupUnderWords: 4, dictionary: [] },
   cursor: { color: "#3380FF", followCursor: true, showBuddy: true },
   agents: { engine: "auto", announceWhenDone: true, alwaysApprove: false, cancelWindowSeconds: 5, maxConcurrent: 5 },

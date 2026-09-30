@@ -1,0 +1,4 @@
+# Describes the screenshot and the region around the cursor.
+FROM llava:13b
+PARAMETER num_ctx 4096
+PARAMETER temperature 0.1

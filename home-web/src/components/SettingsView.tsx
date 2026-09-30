@@ -120,7 +120,7 @@ function ShortcutsTab({ settings, save }: TabProps) {
     <>
       {field("talk", "talk to pip", "hold to talk; pip sees your screen. e.g. Ctrl+Win (hold)")}
       {field("dictate", "dictate", "hold to type with your voice into any app. e.g. RightCtrl (hold)")}
-      {field("textMode", "text box", "type instead of talking. e.g. Ctrl (double-tap)")}
+      {field("textMode", "text box", "type instead of talking. e.g. LeftCtrl (double-tap). double-tapping the dictation key starts hands-free dictation.")}
       <p className="setting-hint">format: keys joined by +, then (hold) or (double-tap). keys: Ctrl, LeftCtrl, RightCtrl, Alt, Shift, Win, or a letter. avoid Ctrl+Alt, which is AltGr on many keyboards.</p>
     </>
   );

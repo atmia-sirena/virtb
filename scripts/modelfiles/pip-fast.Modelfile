@@ -1,0 +1,4 @@
+# Router, quick spoken answers, walkthrough steps, dictation cleanup, memory. Kept loaded forever (keep_alive -1 per request).
+FROM llama3.2:3b
+PARAMETER num_ctx 8192
+PARAMETER temperature 0.4
