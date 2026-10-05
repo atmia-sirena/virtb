@@ -1,0 +1,15 @@
+{
+  "_comment": "Hindi-English code-switched speech written in Latin script. Reduplication (dheere dheere, jaldi jaldi) is grammatical, so stutters are NOT collapsed except English function words.",
+  "fillers": ["aaa"],
+  "stutterCollapse": ["i", "the", "a", "to", "and"],
+  "deleteCommands": ["isko mita do", "isko hata do", "ye hata do", "yeh hata do", "pichhla hata do", "pichla hata do", "pichhla mita do", "pichla mita do", "scratch karo"],
+  "strongBacktrack": ["nahi nahi", "nahin nahin", "nai nai", "sorry mera matlab", "sorry matlab", "nahi ruko", "ruko nahi"],
+  "weakBacktrack": ["matlab", "mera matlab", "actually", "balki"],
+  "format": {
+    "newline": ["naya line", "nayi line", "nai line", "agli line", "agla line"],
+    "paragraph": ["naya paragraph", "nayi para"],
+    "fullStop": ["poorn viram", "purn viram"],
+    "question": ["sawaal ka nishaan", "prashn chinh"]
+  },
+  "llmFillers": ["matlab", "toh", "haan toh", "woh", "ki", "na", "yaar", "basically", "like", "you know"]
+}

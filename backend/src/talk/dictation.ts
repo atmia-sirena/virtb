@@ -1,12 +1,12 @@
 // Dictation, HeyClicky's two-model pipeline: speech-to-text streams the words
-// (they use Deepgram nova-3, ~450 ms; Pip runs Parakeet locally, speech/asr.ts),
-// then a second model does a faithful cleanup. If cleanup fails, the raw
-// transcript is inserted.
+// (they use Deepgram nova-3, ~450 ms; Pip runs local models, speech/asr.ts),
+// then a faithful cleanup (speech/cleanup: rules, then LLM edit ops that can't
+// add words, then romanized Hinglish). If cleanup fails, the raw transcript is
+// inserted.
 import { readSettings, updateSettings } from "../config.js";
-import { resolveModel } from "../lib/models.js";
-import { ollamaChat } from "../lib/ollama.js";
-import { loadPrompt } from "../lib/prompts.js";
 import type { ActiveApp } from "../lib/skills.js";
+import { cleanTranscript, type CleanTranscriptResult, type Editor } from "../speech/cleanup/index.js";
+import type { TimedWord } from "../speech/cleanup/tokens.js";
 
 const terminalProcesses = new Set(["windowsterminal", "conhost", "cmd", "powershell", "pwsh", "wt", "alacritty", "wezterm-gui", "mintty", "openconsole"]);
 
@@ -18,6 +18,18 @@ export function isTerminalApp(app: ActiveApp | undefined): boolean {
 export interface CleanupRequest {
   text: string;
   app?: ActiveApp;
+  /** The language the speech model detected (en-IN, hi, hinglish, ta, te, pa...). */
+  language?: string;
+  /** Timed words with confidences from the speech model, when it gave them. */
+  words?: TimedWord[];
+}
+
+export interface CleanupResponse {
+  text: string;
+  cleaned: boolean;
+  language?: string;
+  applied?: string[];
+  llm?: CleanTranscriptResult["llm"];
 }
 
 export function collapseForTerminal(text: string): string {
@@ -29,35 +41,33 @@ export function removeDashes(text: string): string {
   return text.replace(/\s*[—–]\s*/g, ", ");
 }
 
-export async function cleanupDictation(request: CleanupRequest): Promise<{ text: string; cleaned: boolean }> {
+export async function cleanupDictation(request: CleanupRequest, editor?: Editor): Promise<CleanupResponse> {
   const settings = readSettings();
-  const raw = request.text.trim();
+  const raw = (request.text ?? "").trim();
   const terminal = isTerminalApp(request.app);
-  const finish = (text: string, cleaned: boolean) => ({ text: terminal ? collapseForTerminal(removeDashes(text)) : removeDashes(text), cleaned });
-  const wordCount = raw.split(/\s+/).filter(Boolean).length;
-  if (!settings.dictation.cleanup || wordCount < settings.dictation.skipCleanupUnderWords) return finish(raw, false);
+  const finish = (text: string) => (terminal ? collapseForTerminal(removeDashes(text)) : removeDashes(text));
+  if (!settings.dictation.cleanup || !raw) return { text: finish(raw), cleaned: false };
+  const language = request.language ?? settings.speech.perApp[(request.app?.process ?? "").toLowerCase()] ?? settings.speech.primaryLanguage;
   try {
-    const model = await resolveModel("cleanup", { num_predict: Math.min(1200, Math.round(raw.length / 2) + 60) });
-    if (!model.available) return finish(raw, false);
-    const dictionary = settings.dictation.dictionary.length > 0 ? `\nDICTIONARY: ${settings.dictation.dictionary.join(", ")}` : "";
-    const target = `\nTARGET APP: ${request.app?.name ?? request.app?.process ?? "unknown"}${terminal ? " (a terminal)" : ""}`;
-    const response = await ollamaChat({
-      model: model.model,
-      keep_alive: model.keepAlive,
-      options: model.options,
-      messages: [
-        { role: "system", content: `${loadPrompt("dictation-cleanup")}${dictionary}${target}` },
-        { role: "user", content: raw },
-      ],
+    const result = await cleanTranscript({
+      text: raw,
+      words: request.words,
+      language,
+      script: settings.speech.script[language],
+      appName: request.app?.name ?? request.app?.process,
+      terminal,
+      dictionary: settings.dictation.dictionary,
+      llmPass: settings.dictation.llmPass,
+      minWordsForLlm: settings.dictation.skipCleanupUnderWords,
+      editor,
     });
-    const cleaned = response.message.content.trim().replace(/^["“]|["”]$/g, "");
-    // Faithfulness guard: a cleanup that grows the text a lot added words; keep the raw text instead.
-    const cleanedWordCount = cleaned.split(/\s+/).filter(Boolean).length;
-    if (!cleaned || cleanedWordCount > wordCount * 1.25 + 3) return finish(raw, false);
-    return finish(cleaned, true);
+    if (result.reason) console.warn(`[dictation] LLM edit ${result.llm}: ${result.reason}`);
+    const text = finish(result.text);
+    // Empty means the speaker deleted everything ("…scratch that") or said only fillers: type nothing.
+    return { text, cleaned: text !== finish(raw), language: result.language, applied: result.applied, llm: result.llm };
   } catch (error) {
     console.warn("[dictation] cleanup failed, inserting raw transcript:", (error as Error).message);
-    return finish(raw, false);
+    return { text: finish(raw), cleaned: false };
   }
 }
 

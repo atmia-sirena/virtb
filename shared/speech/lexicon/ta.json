@@ -1,0 +1,50 @@
+{
+  "_comment": "Tamil.",
+  "fillers": [],
+  "stutterCollapse": [],
+  "deleteCommands": ["அதை நீக்கு", "அத நீக்கு", "அதை அழி", "adhai neekku", "atha neekku", "அதை டிலீட் பண்ணு", "adhai delete pannu"],
+  "strongBacktrack": [
+    "இல்ல இல்ல",
+    "இல்லை இல்லை",
+    "சாரி நான் சொல்ல வந்தது",
+    "illa illa",
+    "illai illai"
+  ],
+  "weakBacktrack": [
+    "அதாவது",
+    "இல்ல",
+    "adhavadhu"
+  ],
+  "format": {
+    "newline": [
+      "புதிய வரி",
+      "அடுத்த வரி",
+      "puthiya vari",
+      "adutha vari"
+    ],
+    "paragraph": [
+      "புதிய பத்தி",
+      "puthiya pathi"
+    ],
+    "fullStop": [
+      "முற்றுப்புள்ளி",
+      "mutrupulli"
+    ],
+    "comma": [
+      "கால்புள்ளி",
+      "kaalpulli"
+    ],
+    "question": [
+      "கேள்விக்குறி",
+      "kelvikkuri"
+    ]
+  },
+  "llmFillers": [
+    "அதாவது",
+    "வந்து",
+    "அப்படி",
+    "சரி",
+    "vandhu",
+    "apdi"
+  ]
+}

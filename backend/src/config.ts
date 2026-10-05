@@ -75,6 +75,15 @@ export interface PipSettings {
     asrModel: string;
     ttsModel: string;
     threads: number;
+    /** "auto" uses the GPU speech server when it's running and in-process sherpa otherwise. */
+    asrEngine: "auto" | "sidecar" | "local";
+    /** Languages you speak, in order of preference (en, en-IN, hi, hinglish, ta, te, pa, bn, mr, gu, kn, ml...). */
+    languages: string[];
+    primaryLanguage: string;
+    /** Output script per language: Hinglish is romanized by default, the rest stay native. */
+    script: Record<string, "native" | "roman">;
+    /** Last language used per app process (learned; the language-cycle hotkey corrects it). */
+    perApp: Record<string, string>;
   };
   shortcuts: {
     talk: string;
@@ -85,6 +94,8 @@ export interface PipSettings {
     cleanup: boolean;
     skipCleanupUnderWords: number;
     dictionary: string[];
+    /** The LLM edit pass: "auto" runs it when the rules leave a judgment call or the transcript has no punctuation. */
+    llmPass: "auto" | "always" | "off";
   };
   cursor: {
     color: string;
@@ -104,9 +115,18 @@ export interface PipSettings {
 
 export const defaultSettings: PipSettings = {
   voice: { voiceName: "af_heart", speed: 1, language: "auto" },
-  speech: { asrModel: "parakeet-tdt-0.6b-v3", ttsModel: "kokoro-v1.0", threads: 4 },
+  speech: {
+    asrModel: "parakeet-tdt-0.6b-v3",
+    ttsModel: "kokoro-v1.0",
+    threads: 4,
+    asrEngine: "auto",
+    languages: ["en-IN", "hi", "hinglish"],
+    primaryLanguage: "en-IN",
+    script: { hinglish: "roman", hi: "native", ta: "native", te: "native", pa: "native" },
+    perApp: {},
+  },
   shortcuts: { talk: "Ctrl+Win (hold)", dictate: "RightCtrl (hold)", textMode: "LeftCtrl (double-tap)" },
-  dictation: { cleanup: true, skipCleanupUnderWords: 4, dictionary: [] },
+  dictation: { cleanup: true, skipCleanupUnderWords: 4, dictionary: [], llmPass: "auto" },
   cursor: { color: "#3380FF", followCursor: true, showBuddy: true },
   agents: { engine: "auto", announceWhenDone: true, alwaysApprove: false, cancelWindowSeconds: 5, maxConcurrent: 5 },
   // Named Ollama models created by scripts/setup-models (options baked in); the
@@ -118,7 +138,7 @@ export const defaultSettings: PipSettings = {
     vision: "pip-vision",
     grounding: "qwen2.5vl:7b",
     jev: "pip-jev",
-    cleanup: "pip-fast",
+    cleanup: "pip-cleanup",
     memory: "pip-fast",
     agent: "pip-agent",
   },

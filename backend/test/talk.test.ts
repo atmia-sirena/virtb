@@ -144,23 +144,43 @@ describe("/agent/jev/systemone", () => {
 });
 
 describe("/v2/dictation/cleanup", () => {
-  it("cleans with the fast model, strips dashes, and collapses newlines for terminals", async () => {
-    ollama.setHandler(() => ({ content: "git status —\nthen git push" }));
-    const response = await app.request("/v2/dictation/cleanup", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "um git status then uh git push", app: { process: "WindowsTerminal.exe" } }) });
-    expect(await response.json()).toEqual({ text: "git status, then git push", cleaned: true });
+  const cleanup = async (body: Record<string, unknown>) =>
+    (await app.request("/v2/dictation/cleanup", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })).json();
+
+  it("removes fillers by rule and never adds punctuation in a terminal", async () => {
+    expect(await cleanup({ text: "um git status then uh git push", app: { process: "WindowsTerminal.exe" } })).toMatchObject({ text: "git status then git push", cleaned: true });
+    expect(ollama.requests.length).toBe(0);
   });
 
-  it("keeps the raw transcript when cleanup adds words", async () => {
+  it("asks the cleanup model for edit ops when a self-correction needs judgment", async () => {
+    ollama.setHandler(() => ({ content: '{"delete": [[3, 3], [8, 9]], "punctuation": [{"after": 4, "mark": ","}]}' }));
+    const body = await cleanup({ text: "so I was like thinking we meet on Tuesday actually Wednesday", language: "en-IN" });
+    expect(body).toMatchObject({ text: "So I was thinking, we meet on Wednesday.", cleaned: true, llm: "applied" });
+    // qwen3/pip-cleanup aren't installed in the fake, so the policy falls back to pip-fast; output is schema-constrained.
+    expect(ollama.requests[0].model).toBe("pip-fast");
+    expect(ollama.requests[0].format).toMatchObject({ type: "object" });
+    expect(ollama.requests[0].messages[1].content).toContain("[3]like");
+  });
+
+  it("keeps the rule-based text when the model writes prose or adds words", async () => {
     ollama.setHandler(() => ({ content: "Sure! Here is your cleaned up text with many extra words added for no reason at all." }));
-    const response = await app.request("/v2/dictation/cleanup", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "see you at five tomorrow" }) });
-    expect(await response.json()).toEqual({ text: "see you at five tomorrow", cleaned: false });
+    expect(await cleanup({ text: "i think we should meet on friday basically" })).toMatchObject({ text: "I think we should meet on friday basically.", llm: "rejected" });
+    ollama.setHandler(() => ({ content: '{"replace": [{"from": 6, "to": 6, "with": "Saturday"}]}' }));
+    expect(await cleanup({ text: "i think we should meet on friday basically" })).toMatchObject({ text: "I think we should meet on friday basically.", llm: "rejected" });
   });
 
-  it("skips cleanup for very short utterances", async () => {
-    const before = ollama.requests.length;
-    const response = await app.request("/v2/dictation/cleanup", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "sounds good" }) });
-    expect((await response.json()).cleaned).toBe(false);
-    expect(ollama.requests.length).toBe(before);
+  it("skips the model for very short utterances", async () => {
+    expect((await cleanup({ text: "sounds good" })).text).toBe("Sounds good");
+    expect(ollama.requests.length).toBe(0);
+  });
+
+  it("types nothing when everything was scratched", async () => {
+    expect(await cleanup({ text: "send it now scratch that" })).toMatchObject({ text: "", cleaned: true });
+  });
+
+  it("romanizes Hinglish by default", async () => {
+    const body = await cleanup({ text: "कल मीटिंग 5 बजे है नहीं नहीं 6 बजे है", language: "hinglish" });
+    expect(body.text).toBe("Kal meeting 6 baje hai.");
   });
 });
 

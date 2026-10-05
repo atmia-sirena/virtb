@@ -1,0 +1,45 @@
+{
+  "_comment": "Telugu.",
+  "fillers": [],
+  "stutterCollapse": [],
+  "deleteCommands": ["అది తీసేయ్", "అది తీసెయ్", "అది డిలీట్ చేయి", "adi teeseyi", "adi delete cheyyi"],
+  "strongBacktrack": [
+    "కాదు కాదు",
+    "సారీ నా ఉద్దేశం",
+    "kaadu kaadu",
+    "kadu kadu"
+  ],
+  "weakBacktrack": [
+    "అంటే",
+    "ante"
+  ],
+  "format": {
+    "newline": [
+      "కొత్త లైన్",
+      "తర్వాతి లైన్",
+      "kotha line"
+    ],
+    "paragraph": [
+      "కొత్త పేరా",
+      "kotha para"
+    ],
+    "fullStop": [
+      "పూర్తి విరామం",
+      "purnaviramam"
+    ],
+    "comma": [
+      "కామా"
+    ],
+    "question": [
+      "ప్రశ్నార్థకం"
+    ]
+  },
+  "llmFillers": [
+    "అంటే",
+    "అది",
+    "ఇక",
+    "ante",
+    "adi",
+    "ika"
+  ]
+}

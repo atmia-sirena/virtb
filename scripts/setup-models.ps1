@@ -1,4 +1,4 @@
-# Creates Pip's named Ollama models (pip-fast, pip-jev, pip-vision, pip-deep, pip-agent)
+# Creates Pip's named Ollama models (pip-fast, pip-jev, pip-cleanup, pip-vision, pip-deep, pip-agent)
 # from the base models you already have, with context size and temperature baked in,
 # and sets Ollama's server options. Safe to re-run.
 $ErrorActionPreference = "Stop"
@@ -24,9 +24,16 @@ foreach ($name in $serverOptions.Keys) {
 }
 
 $installed = (ollama list) -join "`n"
+# Dictation cleanup model for Indian languages (Apache-2.0, ~5 GB).
+if ($installed -notmatch "qwen3:8b") {
+    Write-Host "pulling qwen3:8b for dictation cleanup (Hindi, Hinglish, Tamil, Telugu, Punjabi)"
+    ollama pull qwen3:8b
+    $installed = (ollama list) -join "`n"
+}
 $aliases = @(
     @{ Name = "pip-fast";   Base = "llama3.2:3b" },
     @{ Name = "pip-jev";    Base = "llama3.2:3b" },
+    @{ Name = "pip-cleanup"; Base = "qwen3:8b" },
     @{ Name = "pip-vision"; Base = "llava:13b" },
     @{ Name = "pip-deep";   Base = "llama3.3:70b" },
     @{ Name = "pip-agent";  Base = "llama3.3:70b" }

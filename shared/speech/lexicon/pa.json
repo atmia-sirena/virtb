@@ -1,0 +1,16 @@
+{
+  "_comment": "Punjabi (Gurmukhi) and romanized Punjabi.",
+  "fillers": [],
+  "stutterCollapse": [],
+  "deleteCommands": ["ਇਹ ਮਿਟਾ ਦਿਓ", "ਇਹਨੂੰ ਮਿਟਾ ਦਿਓ", "ਪਿਛਲਾ ਮਿਟਾ ਦਿਓ", "ਇਹ ਹਟਾ ਦਿਓ", "ਪਿਛਲਾ ਹਟਾ ਦਿਓ", "eh mita dio", "pichhla mita dio"],
+  "strongBacktrack": ["ਨਹੀਂ ਨਹੀਂ", "ਨਹੀ ਨਹੀ", "ਸੌਰੀ ਮੇਰਾ ਮਤਲਬ", "nahi nahi", "nai nai"],
+  "weakBacktrack": ["ਮਤਲਬ", "ਮੇਰਾ ਮਤਲਬ", "matlab"],
+  "format": {
+    "newline": ["ਨਵੀਂ ਲਾਈਨ", "ਅਗਲੀ ਲਾਈਨ", "navi line", "nawi line"],
+    "paragraph": ["ਨਵਾਂ ਪੈਰਾ", "nawa para"],
+    "fullStop": ["ਡੰਡੀ", "ਪੂਰਨ ਵਿਰਾਮ"],
+    "comma": ["ਕੌਮਾ"],
+    "question": ["ਪ੍ਰਸ਼ਨ ਚਿੰਨ੍ਹ"]
+  },
+  "llmFillers": ["ਮਤਲਬ", "ਤਾਂ", "ਯਾਰ", "ਵੇਖੋ", "matlab", "yaar", "vekho"]
+}

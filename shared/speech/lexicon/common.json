@@ -1,0 +1,32 @@
+{
+  "_comment": "Applies to every language. Only fillers that are never real words; context-dependent ones (like, matlab, you know) are left to the LLM edit pass.",
+  "fillers": ["um", "umm", "ummm", "uh", "uhh", "uhhh", "uhm", "er", "erm", "hmm", "hmmm", "hm", "mm", "mmm", "ahh", "aah", "aaah", "ehh",
+              "उम्म", "उम", "अम्म", "हम्म", "हम्मम", "उह", "अं", "ऍम", "म्म",
+              "ம்ம்", "ம்", "அம்ம்", "உம்ம்",
+              "మ్మ్", "అమ్మ్", "ఉమ్మ్", "హ్మ్",
+              "ਹਮਮ", "ਉਮ", "ਮਮ", "ਅਮ"],
+  "deleteCommands": ["scratch that", "delete that", "undo that", "strike that", "erase that", "cancel that", "forget that", "remove that", "delete the last sentence", "scratch the last sentence",
+                     "स्क्रैच दैट", "डिलीट दैट", "अनडू दैट", "कैंसल दैट",
+                     "ஸ்க்ராட்ச் தட்", "டிலீட் தட்",
+                     "స్క్రాచ్ దట్", "డిలీట్ దట్",
+                     "ਸਕ੍ਰੈਚ ਦੈਟ", "ਡਿਲੀਟ ਦੈਟ"],
+  "strongBacktrack": ["no wait", "wait no", "sorry i mean", "sorry i meant", "oops i mean", "नो वेट", "सॉरी आई मीन"],
+  "weakBacktrack": ["actually", "i mean", "rather", "or rather", "make that", "एक्चुअली"],
+  "format": {
+    "newline": ["new line", "next line", "line break", "न्यू लाइन", "नेक्स्ट लाइन", "நியூ லைன்", "న్యూ లైన్", "ਨਿਊ ਲਾਈਨ"],
+    "paragraph": ["new paragraph", "next paragraph", "न्यू पैराग्राफ", "நியூ பாராகிராஃப்", "న్యూ పేరాగ్రాఫ్", "ਨਿਊ ਪੈਰਾਗ੍ਰਾਫ"],
+    "comma": ["comma", "कॉमा", "कोमा", "காமா", "కామా", "ਕੌਮਾ", "ਕਾਮਾ"],
+    "fullStop": ["full stop", "फुल स्टॉप", "फुलस्टॉप", "ஃபுல் ஸ்டாப்", "புல் ஸ்டாப்", "ఫుల్ స్టాప్", "ਫੁੱਲ ਸਟਾਪ", "ਫੁਲ ਸਟਾਪ"],
+    "period": ["period"],
+    "question": ["question mark", "क्वेश्चन मार्क", "கொஸ்டின் மார்க்", "క్వశ్చన్ మార్క్", "ਕੁਐਸ਼ਚਨ ਮਾਰਕ"],
+    "exclamation": ["exclamation mark", "exclamation point", "एक्सक्लेमेशन मार्क"],
+    "colon": ["colon", "कोलन"],
+    "openBracket": ["open bracket", "open parenthesis", "ओपन ब्रैकेट"],
+    "closeBracket": ["close bracket", "close parenthesis", "क्लोज ब्रैकेट"],
+    "at": ["at the rate", "at the rate of", "एट द रेट", "ऐट द रेट", "அட் தி ரேட்", "ఎట్ ది రేట్", "ਐਟ ਦ ਰੇਟ"],
+    "dot": ["dot", "डॉट", "டாட்", "డాట్", "ਡਾਟ"],
+    "underscore": ["underscore", "अंडरस्कोर"],
+    "bullet": ["bullet point", "new bullet", "bullet", "बुलेट पॉइंट"]
+  },
+  "domains": ["com", "in", "org", "net", "co", "io", "ai", "edu", "gov", "co.in"]
+}

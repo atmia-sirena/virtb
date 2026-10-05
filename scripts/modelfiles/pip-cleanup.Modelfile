@@ -1,0 +1,6 @@
+# Dictation cleanup: returns edit operations over numbered tokens (never free text), so it
+# can't add words. Qwen3-8B reads Hindi, Tamil, Telugu and Punjabi far better than the 3B.
+# Thinking is turned off per request (think: false) to keep it under ~250 ms on the GPU.
+FROM qwen3:8b
+PARAMETER num_ctx 8192
+PARAMETER temperature 0

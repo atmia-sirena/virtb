@@ -6,6 +6,8 @@ import { listInstalledModels, type OllamaOptions } from "./ollama.js";
 interface JobDefaults {
   /** Base model the pip-* alias is built from (scripts/Modelfiles). */
   baseModel: string;
+  /** Tried in order when neither the configured model nor the base model is installed. */
+  fallbacks?: string[];
   keepAlive: string | number;
   options: OllamaOptions;
 }
@@ -14,7 +16,8 @@ interface JobDefaults {
 export const jobDefaults: Record<ModelJob, JobDefaults> = {
   router: { baseModel: "llama3.2:3b", keepAlive: -1, options: { temperature: 0, num_ctx: 8192, num_predict: 64 } },
   talk: { baseModel: "llama3.2:3b", keepAlive: -1, options: { temperature: 0.4, num_ctx: 8192, num_predict: 300 } },
-  cleanup: { baseModel: "llama3.2:3b", keepAlive: -1, options: { temperature: 0, num_ctx: 8192, num_predict: 400 } },
+  // Qwen3-8B handles Hindi, Tamil, Telugu and Punjabi text far better than the 3B; it returns edit ops, not text.
+  cleanup: { baseModel: "qwen3:8b", fallbacks: ["pip-fast", "llama3.2:3b"], keepAlive: -1, options: { temperature: 0, num_ctx: 8192, num_predict: 400 } },
   memory: { baseModel: "llama3.2:3b", keepAlive: -1, options: { temperature: 0, num_ctx: 8192, num_predict: 600 } },
   jev: { baseModel: "llama3.2:3b", keepAlive: -1, options: { temperature: 0, num_ctx: 4096, num_predict: 24 } },
   vision: { baseModel: "llava:13b", keepAlive: "30m", options: { temperature: 0.1, num_ctx: 4096, num_predict: 400 } },
@@ -62,8 +65,8 @@ export async function resolveModel(job: ModelJob, optionOverrides: OllamaOptions
   if (!installedModelNames || Date.now() - installedModelsCheckedAt > 60_000) await refreshInstalledModels();
   const defaults = jobDefaults[job];
   const configuredModel = readSettings().models[job] ?? defaults.baseModel;
-  let model = configuredModel;
-  if (!isModelInstalled(configuredModel) && isModelInstalled(defaults.baseModel)) model = defaults.baseModel;
+  const candidates = [configuredModel, defaults.baseModel, ...(defaults.fallbacks ?? [])];
+  const model = candidates.find(isModelInstalled) ?? configuredModel;
   return {
     job,
     model,

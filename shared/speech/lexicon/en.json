@@ -1,0 +1,6 @@
+{
+  "_comment": "English (including Indian English).",
+  "fillers": [],
+  "stutterCollapse": ["i", "the", "a", "an", "to", "and", "we", "you", "it", "is", "that", "so", "but", "in", "of", "on", "for", "my", "this", "he", "she", "they"],
+  "llmFillers": ["like", "you know", "basically", "sort of", "kind of", "i guess", "okay so", "so yeah", "right"]
+}
