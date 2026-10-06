@@ -89,6 +89,8 @@ export interface PipSettings {
     talk: string;
     dictate: string;
     textMode: string;
+    /** Switch dictation language when language ID guessed wrong (remembered for the app). */
+    languageCycle: string;
   };
   dictation: {
     cleanup: boolean;
@@ -125,7 +127,7 @@ export const defaultSettings: PipSettings = {
     script: { hinglish: "roman", hi: "native", ta: "native", te: "native", pa: "native" },
     perApp: {},
   },
-  shortcuts: { talk: "Ctrl+Win (hold)", dictate: "RightCtrl (hold)", textMode: "LeftCtrl (double-tap)" },
+  shortcuts: { talk: "Ctrl+Win (hold)", dictate: "RightCtrl (hold)", textMode: "LeftCtrl (double-tap)", languageCycle: "RightShift (double-tap)" },
   dictation: { cleanup: true, skipCleanupUnderWords: 4, dictionary: [], llmPass: "auto" },
   cursor: { color: "#3380FF", followCursor: true, showBuddy: true },
   agents: { engine: "auto", announceWhenDone: true, alwaysApprove: false, cancelWindowSeconds: 5, maxConcurrent: 5 },

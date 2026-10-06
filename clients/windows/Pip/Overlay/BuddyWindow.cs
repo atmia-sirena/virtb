@@ -31,6 +31,8 @@ public sealed class BuddyWindow
     private readonly Border label;
     private readonly TextBlock labelText;
     private readonly StackPanel waveform;
+    private readonly Border languageChip;
+    private readonly TextBlock languageText;
     private readonly StackPanel thinkingDots;
     private readonly Rectangle[] bars = new Rectangle[5];
     private Color accent;
@@ -75,6 +77,13 @@ public sealed class BuddyWindow
         Canvas.SetTop(waveformChip, 18);
         root.Children.Add(waveformChip);
         this.waveformChip = waveformChip;
+
+        // Which language Pip hears ("हिं", "த", "Hinglish"); double-tap Right Shift to switch.
+        languageText = new TextBlock { FontSize = 11.5, FontWeight = FontWeights.SemiBold, Foreground = Brushes.White, FontFamily = new FontFamily("Nirmala UI, Segoe UI") };
+        languageChip = new Border { Child = languageText, Height = 22, CornerRadius = new CornerRadius(11), Padding = new Thickness(8, 2, 8, 0), Background = new SolidColorBrush(Color.FromArgb(235, 25, 27, 31)), Visibility = Visibility.Collapsed };
+        Canvas.SetLeft(languageChip, 112);
+        Canvas.SetTop(languageChip, 18);
+        root.Children.Add(languageChip);
 
         thinkingDots = new StackPanel { Orientation = Orientation.Horizontal, Visibility = Visibility.Collapsed };
         for (var index = 0; index < 3; index++)
@@ -157,6 +166,12 @@ public sealed class BuddyWindow
         }
         bubbleText.Text = text.Length > 260 ? "…" + text[^259..] : text;
         bubble.Visibility = Visibility.Visible;
+    }
+
+    public void SetLanguage(string? chip)
+    {
+        languageText.Text = chip ?? "";
+        languageChip.Visibility = string.IsNullOrWhiteSpace(chip) ? Visibility.Collapsed : Visibility.Visible;
     }
 
     public void SetPointLabel(string? text)

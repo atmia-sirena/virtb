@@ -258,13 +258,14 @@ function remember(sessionId: string, result: AsrFinal, app: ActiveApp | undefine
   return result;
 }
 
-export async function finishAsrSession(sessionId: string): Promise<AsrFinal | undefined> {
+/** `language` overrides language ID for this utterance (the language-cycle hotkey pressed mid-dictation). */
+export async function finishAsrSession(sessionId: string, language?: string): Promise<AsrFinal | undefined> {
   const session = sessions.get(sessionId);
   if (!session) return undefined;
   sessions.delete(sessionId);
   if (session.remoteId) {
     try {
-      const remote = await speechServerRequest<{ text: string; language?: string; words?: TimedWord[]; confidence?: number | null; model?: string }>(`/sessions/${session.remoteId}/finish`, {}, 20_000);
+      const remote = await speechServerRequest<{ text: string; language?: string; words?: TimedWord[]; confidence?: number | null; model?: string }>(`/sessions/${session.remoteId}/finish`, language ? { language } : {}, 20_000);
       const result: AsrFinal = { text: remote.text.trim(), language: remote.language, words: remote.words, model: remote.model, engine: "sidecar", ...(remote.confidence != null ? { confidence: remote.confidence } : {}) };
       return remember(sessionId, result, session.options.app);
     } catch (error) {
@@ -274,7 +275,7 @@ export async function finishAsrSession(sessionId: string): Promise<AsrFinal | un
   }
   if (session.decoding) await session.decoding.catch(() => undefined);
   await decodePending(session, true);
-  const result: AsrFinal = { text: joinText(session.committedText, session.interimText).trim(), engine: "local", model: readSettings().speech.asrModel };
+  const result: AsrFinal = { text: joinText(session.committedText, session.interimText).trim(), engine: "local", model: readSettings().speech.asrModel, ...(language ? { language } : {}) };
   return remember(sessionId, result, undefined);
 }
 

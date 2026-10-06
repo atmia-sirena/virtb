@@ -61,3 +61,12 @@ def test_transcribe_with_a_forced_engine(registry):
     body = http.post("/transcribe?languages=ta&language=ta&engine=conformer", content=buffer.getvalue()).json()
     assert body["model"] == "conformer"
     assert http.post("/transcribe?languages=ta&engine=missing", content=buffer.getvalue()).status_code == 503
+
+
+def test_finish_with_a_language_override(registry):
+    http = client(registry)
+    session = http.post("/sessions", json={"languages": ["en", "hinglish", "ta"]}).json()
+    http.post(f"/sessions/{session['sessionId']}/audio", content=pcm16(tone(1.5)))
+    final = http.post(f"/sessions/{session['sessionId']}/finish", json={"language": "ta"}).json()
+    assert final["language"] == "ta"
+    assert final["text"] == "நாளைக்கு வருவேன்"

@@ -136,6 +136,7 @@ public sealed class ShortcutsDto
     public string Talk { get; set; } = "Ctrl+Win (hold)";
     public string Dictate { get; set; } = "RightCtrl (hold)";
     public string TextMode { get; set; } = "LeftCtrl (double-tap)";
+    public string LanguageCycle { get; set; } = "RightShift (double-tap)";
 }
 
 public sealed class CursorSettingsDto

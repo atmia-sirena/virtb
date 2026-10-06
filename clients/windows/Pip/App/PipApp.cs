@@ -136,6 +136,9 @@ public sealed class PipApp : IDisposable
                 if (dictation!.HandsFree) dictation.End();
                 else dictation.Begin(handsFree: true);
                 break;
+            case ("language-cycle", HotkeyAction.DoubleTapped):
+                dictation!.CycleLanguage();
+                break;
             case ("text", HotkeyAction.DoubleTapped):
                 if (!dictation!.IsActive) composer!.Open();
                 break;

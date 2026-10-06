@@ -68,11 +68,15 @@ export async function describeSpeechLanguages() {
   };
 }
 
-export type LanguageSettingsUpdate = Partial<Pick<PipSettings["speech"], "languages" | "primaryLanguage" | "script" | "asrEngine">>;
+export type LanguageSettingsUpdate = Partial<Pick<PipSettings["speech"], "languages" | "primaryLanguage" | "script" | "asrEngine">> & { forgetPerApp?: boolean };
 
 export function updateSpeechLanguages(update: LanguageSettingsUpdate): PipSettings["speech"] {
   const known = new Set(speechLanguages.map((language) => language.code));
-  const change: LanguageSettingsUpdate = {};
+  const change: Partial<PipSettings["speech"]> = {};
+  if (update.forgetPerApp) {
+    // Settings merge objects key by key, so clearing a map means replacing it on the cached copy.
+    readSettings().speech.perApp = {};
+  }
   if (Array.isArray(update.languages)) {
     const languages = update.languages.filter((code) => known.has(code));
     if (languages.length > 0) change.languages = languages;

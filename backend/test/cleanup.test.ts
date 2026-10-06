@@ -72,6 +72,10 @@ describe("rules: Hinglish (romanized)", () => {
     expect(text).toBe("Mera laptop slow chal raha hai.");
   });
 
+  it("romanizes Hindi when you chose Latin letters for it", async () => {
+    expect(await rules("अच्छा ठीक है", "hi", { script: "roman" })).toBe("Accha theek hai");
+  });
+
   it("keeps Devanagari when Hindi is set to native script", async () => {
     expect(await rules("मैं कल आऊंगा पूर्ण विराम नई लाइन ठीक है", "hi")).toBe("मैं कल आऊंगा।\nठीक है।");
   });

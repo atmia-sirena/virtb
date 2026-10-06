@@ -76,13 +76,41 @@ export interface Connector {
 
 export interface Settings {
   voice: { voiceName: string; speed: number; language: string };
-  speech: { asrModel: string; ttsModel: string; threads: number };
-  shortcuts: { talk: string; dictate: string; textMode: string };
-  dictation: { cleanup: boolean; skipCleanupUnderWords: number; dictionary: string[] };
+  speech: {
+    asrModel: string;
+    ttsModel: string;
+    threads: number;
+    asrEngine: "auto" | "sidecar" | "local";
+    languages: string[];
+    primaryLanguage: string;
+    script: Record<string, "native" | "roman">;
+    perApp: Record<string, string>;
+  };
+  shortcuts: { talk: string; dictate: string; textMode: string; languageCycle: string };
+  dictation: { cleanup: boolean; skipCleanupUnderWords: number; dictionary: string[]; llmPass: "auto" | "always" | "off" };
   cursor: { color: string; followCursor: boolean; showBuddy: boolean };
   agents: { engine: "auto" | "codex" | "builtin"; announceWhenDone: boolean; alwaysApprove: boolean; cancelWindowSeconds: number; maxConcurrent: number };
   models: Record<string, string>;
   onboarding: { completed: boolean };
+}
+
+export interface SpeechLanguage {
+  code: string;
+  name: string;
+  native: string;
+  chip: string;
+  cleanup: boolean;
+  scripts: ("native" | "roman")[];
+}
+
+export interface SpeechLanguages {
+  available: SpeechLanguage[];
+  selected: string[];
+  primary: string;
+  script: Record<string, "native" | "roman">;
+  perApp: Record<string, string>;
+  asrEngine: "auto" | "sidecar" | "local";
+  server: { running: boolean; device?: string; vad?: string; engines?: Record<string, { kind: string; usable: boolean; loaded: boolean; error?: string }> };
 }
 
 export interface SpeechModelInfo {
@@ -139,6 +167,9 @@ export const api = {
   saveMemory: (files: { profile?: string; volatile?: string }) => request<{ profile: string; volatile: string }>("POST", "/me/memory/save", files),
   modelPolicy: () => request<{ installed: string[]; jobs: Record<string, { model: string; available: boolean }> }>("GET", "/runtime/model-policy"),
   speechModels: () => request<{ models: SpeechModelInfo[]; voices: string[] }>("GET", "/v2/speech/models"),
+  speechLanguages: () => request<SpeechLanguages>("GET", "/v2/speech/languages"),
+  saveSpeechLanguages: (change: { languages?: string[]; primaryLanguage?: string; script?: Record<string, "native" | "roman">; asrEngine?: string; forgetPerApp?: boolean }) => request<Settings["speech"]>("PUT", "/v2/speech/languages", change),
+  saveClip: (clip: { audio: string; reference: string; language: string }) => request<{ id: string; count: number }>("POST", "/v2/eval/clips", clip),
   dictionary: (change: { add?: string[]; remove?: string[] }) => request<{ dictionary: string[] }>("POST", "/v2/dictation/dictionary", change),
   readAll: () => request<{ ok: boolean }>("POST", "/agent/notifications/read-all"),
 };

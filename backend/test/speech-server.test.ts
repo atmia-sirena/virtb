@@ -27,7 +27,8 @@ beforeAll(async () => {
     calls.push({ path: "audio", body: bytes.length });
     return context.json({ text: "कल meeting", language: "hi" });
   });
-  fake.post("/sessions/:id/finish", (context) => {
+  fake.post("/sessions/:id/finish", async (context) => {
+    calls.push({ path: "finish", body: await context.req.json().catch(() => ({})) });
     if (failFinish) return context.json({ error: "gpu fell over" }, 500);
     return context.json({
       text: "कल meeting पांच बजे है नहीं नहीं छह बजे है",
@@ -83,6 +84,12 @@ describe("dictation through the speech server", () => {
     expect(cleaned.body).toMatchObject({ text: "Kal meeting chhe baje hai.", language: "hinglish" });
   });
 
+  it("passes a mid-utterance language switch to the speech server", async () => {
+    const created = await post("/v2/asr/sessions", {});
+    await post(`/v2/asr/sessions/${created.body.sessionId}/finish`, { language: "ta" });
+    expect(calls.find((call) => call.path === "finish")?.body).toEqual({ language: "ta" });
+  });
+
   it("learns the app's language for next time", async () => {
     const created = await post("/v2/asr/sessions", { app: { process: "slack.exe" } });
     await post(`/v2/asr/sessions/${created.body.sessionId}/finish`);
@@ -129,6 +136,8 @@ describe("language settings", () => {
     expect((await post("/v2/speech/language-cycle", { app: { process: "Code.exe" }, current: "en" })).body).toEqual({ language: "hi", chip: "हिं" });
     expect(readSettings().speech.perApp.code).toBe("hi");
     expect((await post("/v2/speech/language-cycle", { app: { process: "Code.exe" } })).body.language).toBe("hinglish");
+    await app.request("/v2/speech/languages", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ forgetPerApp: true }) });
+    expect(readSettings().speech.perApp).toEqual({});
   });
 
   it("saves personal test clips", async () => {

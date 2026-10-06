@@ -391,7 +391,7 @@ export function tidy(tokens: Token[], options: DeterministicOptions): Token[] {
   while (output.at(-1)?.kind === "newline") output.pop();
 
   // Latin-script casing for English and Hinglish.
-  if ((options.casing ?? true) && (language === "en" || language === "hinglish")) {
+  if ((options.casing ?? true) && (language === "en" || language === "hinglish" || options.script === "roman")) {
     let capitalizeNext = true;
     for (const token of output) {
       if (token.kind === "newline" || (token.kind === "punct" && sentenceEnders.has(token.text))) {

@@ -123,7 +123,8 @@ export async function cleanTranscript(request: CleanTranscriptRequest): Promise<
     }
   }
 
-  if (language === "hinglish" && script === "roman" && tokens.some((token) => hasDevanagari(token.text))) {
+  // Hinglish by default, Hindi when you chose Latin letters for it.
+  if ((language === "hinglish" || language === "hi") && script === "roman" && tokens.some((token) => hasDevanagari(token.text))) {
     const romanized = await romanizeTokens(tokens, request.transliterate ?? ((words) => transliterateToLatin(words, "hi")));
     if (romanized.changed) {
       tokens = tidy(romanized.tokens, options);

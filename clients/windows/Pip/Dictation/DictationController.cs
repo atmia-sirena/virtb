@@ -12,8 +12,9 @@ using Pip.Platform;
 namespace Pip.Dictation;
 
 /// <summary>
-/// Hold to dictate into any app (or double-tap for hands-free): local Parakeet
-/// streams the words into the buddy's bubble, a faithful local cleanup runs on
+/// Hold to dictate into any app (or double-tap for hands-free): the local speech
+/// models stream the words into the buddy's bubble with a language chip
+/// (double-tap Right Shift to switch language), a faithful local cleanup runs on
 /// release, and the text is typed or pasted into the app you were in. Every
 /// session is backed up locally before insertion, and corrections you make in
 /// the next 20 seconds teach the personal dictionary.
@@ -26,6 +27,8 @@ public sealed class DictationController
     private SpeechToText? speechToText;
     private ForegroundInfo? target;
     private bool active;
+    // Set by the language-cycle hotkey; overrides language ID for this utterance.
+    private string? forcedLanguage;
 
     public bool HandsFree { get; private set; }
 
@@ -65,9 +68,14 @@ public sealed class DictationController
         {
             if (active) overlay.SetCaption(text);
         });
+        speechToText.LanguageDetected += code => dispatcher.BeginInvoke(() =>
+        {
+            if (active && forcedLanguage is null) overlay.SetLanguage(LanguageChips.For(code));
+        });
+        forcedLanguage = null;
         try
         {
-            await speechToText.StartAsync();
+            await speechToText.StartAsync(new { app = ForegroundApp.Describe(target) });
         }
         catch (Exception error)
         {
@@ -83,9 +91,13 @@ public sealed class DictationController
         HandsFree = false;
         overlay.SetState(BuddyState.Thinking);
         string raw;
+        string? sessionId;
+        string? language;
         try
         {
-            raw = await speechToText.FinishAsync();
+            raw = await speechToText.FinishAsync(forcedLanguage);
+            sessionId = speechToText.LastSessionId;
+            language = forcedLanguage ?? speechToText.Language;
         }
         finally
         {
@@ -102,7 +114,7 @@ public sealed class DictationController
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-            var result = await backend.PostAsync<JsonElement>("v2/dictation/cleanup", new { text = raw, app = ForegroundApp.Describe(target) }, timeout.Token);
+            var result = await backend.PostAsync<JsonElement>("v2/dictation/cleanup", new { text = raw, app = ForegroundApp.Describe(target), sessionId, language }, timeout.Token);
             text = result.GetProperty("text").GetString() ?? raw;
         }
         catch (Exception error)
@@ -112,6 +124,39 @@ public sealed class DictationController
         await TextInserter.InsertAsync(target.Window, target.ProcessName, text);
         Done();
         _ = LearnFromCorrectionsAsync(text);
+    }
+
+    /// <summary>
+    /// Double-tap Right Shift: switch to the next of your languages. While dictating it
+    /// re-decodes this utterance in that language; either way the app remembers it.
+    /// </summary>
+    public async void CycleLanguage()
+    {
+        var app = ForegroundApp.Describe(target ?? ForegroundApp.Read());
+        try
+        {
+            var result = await backend.PostAsync<JsonElement>("v2/speech/language-cycle", new { app, current = forcedLanguage ?? speechToText?.Language });
+            var code = result.GetProperty("language").GetString();
+            var chip = result.TryGetProperty("chip", out var value) ? value.GetString() : LanguageChips.For(code);
+            if (active) forcedLanguage = code;
+            overlay.SetInteractionActive(true);
+            overlay.SetLanguage(chip);
+            if (!active)
+            {
+                overlay.SetCaption($"dictating in {chip} here");
+                _ = Task.Delay(1500).ContinueWith(_ => dispatcher.BeginInvoke(() =>
+                {
+                    if (active) return;
+                    overlay.SetCaption(null);
+                    overlay.SetLanguage(null);
+                    overlay.SetInteractionActive(false);
+                }));
+            }
+        }
+        catch (Exception error)
+        {
+            Trace.WriteLine($"[dictation] language switch failed: {error.Message}");
+        }
     }
 
     public void Cancel()
@@ -126,8 +171,10 @@ public sealed class DictationController
 
     private void Done()
     {
+        forcedLanguage = null;
         overlay.SetState(BuddyState.Idle);
         overlay.SetCaption(null);
+        overlay.SetLanguage(null);
         overlay.SetInteractionActive(false);
     }
 

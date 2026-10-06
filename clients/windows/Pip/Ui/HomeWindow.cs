@@ -61,6 +61,11 @@ public sealed class HomeWindow
                 {
                 }
             };
+            // Home's own page may use the mic (Settings → Languages → record your test set); nothing else may.
+            webView.CoreWebView2.PermissionRequested += (_, args) =>
+            {
+                if (args.PermissionKind == CoreWebView2PermissionKind.Microphone && new Uri(args.Uri).IsLoopback) args.State = CoreWebView2PermissionState.Allow;
+            };
             // Links from agent replies open in the user's browser, not inside Home.
             webView.CoreWebView2.NewWindowRequested += (_, args) =>
             {

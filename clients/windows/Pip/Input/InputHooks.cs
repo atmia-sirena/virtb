@@ -45,6 +45,7 @@ public sealed class HotkeyService : IDisposable
         Set("talk", shortcuts.Talk);
         Set("dictate", shortcuts.Dictate);
         Set("text", shortcuts.TextMode);
+        Set("language-cycle", shortcuts.LanguageCycle);
         // Hands-free dictation: double-tap the dictation key, tap again (or Esc) to finish.
         Set("dictate-hands-free", $"{shortcuts.Dictate.Split('(')[0].Trim()} (double-tap)");
     }

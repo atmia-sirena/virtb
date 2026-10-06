@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { api, host, playVoicePreview, type Connector, type Settings, type SpeechModelInfo } from "../api";
+import { LanguagesTab } from "./LanguagesTab";
 
-const tabs = ["general", "voice", "shortcuts", "dictation", "cursor", "agents", "integrations", "models", "memory"] as const;
+const tabs = ["general", "voice", "shortcuts", "dictation", "languages", "cursor", "agents", "integrations", "models", "memory"] as const;
 type Tab = (typeof tabs)[number];
 
 function Row({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
@@ -53,6 +54,7 @@ export function SettingsView({ tab, onTab }: { tab: string; onTab: (tab: string)
         {activeTab === "voice" && <VoiceTab settings={settings} save={save} />}
         {activeTab === "shortcuts" && <ShortcutsTab settings={settings} save={save} />}
         {activeTab === "dictation" && <DictationTab settings={settings} save={save} />}
+        {activeTab === "languages" && <LanguagesTab settings={settings} save={save} />}
         {activeTab === "cursor" && <CursorTab settings={settings} save={save} />}
         {activeTab === "agents" && <AgentsTab settings={settings} save={save} />}
         {activeTab === "integrations" && <IntegrationsTab />}
@@ -121,6 +123,7 @@ function ShortcutsTab({ settings, save }: TabProps) {
       {field("talk", "talk to pip", "hold to talk; pip sees your screen. e.g. Ctrl+Win (hold)")}
       {field("dictate", "dictate", "hold to type with your voice into any app. e.g. RightCtrl (hold)")}
       {field("textMode", "text box", "type instead of talking. e.g. LeftCtrl (double-tap). double-tapping the dictation key starts hands-free dictation.")}
+      {field("languageCycle", "switch language", "while dictating, re-hears what you said in your next language and remembers it for that app. e.g. RightShift (double-tap)")}
       <p className="setting-hint">format: keys joined by +, then (hold) or (double-tap). keys: Ctrl, LeftCtrl, RightCtrl, Alt, Shift, Win, or a letter. avoid Ctrl+Alt, which is AltGr on many keyboards.</p>
     </>
   );

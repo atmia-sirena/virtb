@@ -10,6 +10,18 @@ Pip is a personal, non-commercial build. Everything it runs is local, and every 
 | [Qwen2.5-VL 7B](https://ollama.com/library/qwen2.5vl) (optional) | pixel pointing | Apache-2.0 | yes |
 | [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) | speech runtime (Node addon) | Apache-2.0 | yes |
 | [NVIDIA Parakeet TDT 0.6B v3/v2](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) | speech-to-text | CC-BY-4.0 | yes (attribution) |
+| [Qwen3-ASR 1.7B / 0.6B](https://github.com/QwenLM/Qwen3-ASR) and the `qwen-asr` package | speech-to-text for English, Hindi and Hinglish; base for Pip's fine-tune (official SFT script vendored in `training/third_party`) | Apache-2.0 | yes |
+| IndicConformer-600M multilingual (AI4Bharat) | speech-to-text for the 22 scheduled languages | MIT | yes |
+| SraVaani-1.0 (IISc / ARTPARK) | Indic speech-to-text, fine-tune base | MIT | yes |
+| [Whisper large-v3 / medium](https://github.com/openai/whisper) via [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | Indian-accented English, language ID | MIT | yes |
+| IndicWhisper ([AI4Bharat/vistaar](https://github.com/AI4Bharat/vistaar)) (optional) | Hindi speech-to-text | MIT | yes |
+| Shunya Labs zero-stt-hinglish (optional) | Hinglish speech-to-text | OpenRAIL-M | open weights, use restrictions |
+| Omnilingual ASR 300M (Meta) | rare languages | Apache-2.0 | yes |
+| [Silero VAD](https://github.com/snakers4/silero-vad) | voice activity | MIT | yes |
+| [IndicXlit](https://github.com/AI4Bharat/IndicXlit) (optional) | romanized Hinglish | MIT | yes |
+| [Qwen3-8B](https://ollama.com/library/qwen3) | dictation cleanup (`pip-cleanup`) | Apache-2.0 | yes |
+| [Indic Parler-TTS](https://huggingface.co/ai4bharat/indic-parler-tts) | voicing the synthetic benchmark/training set | Apache-2.0 | yes |
+| [FastAPI](https://github.com/fastapi/fastapi), [uvicorn](https://github.com/encode/uvicorn), [PyTorch](https://github.com/pytorch/pytorch), [NeMo](https://github.com/NVIDIA/NeMo), [transformers](https://github.com/huggingface/transformers), [PEFT](https://github.com/huggingface/peft), [TRL](https://github.com/huggingface/trl) | speech server, training | MIT / BSD-3 / Apache-2.0 | yes |
 | [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) | voice | Apache-2.0 | yes |
 | [Piper](https://github.com/rhasspy/piper) voices (optional) | fast voice | MIT | yes |
 | [Codex CLI](https://github.com/openai/codex) (optional) | agent runtime, as HeyClicky bundles it | Apache-2.0 | yes |
@@ -29,3 +41,12 @@ Pip is a personal, non-commercial build. Everything it runs is local, and every 
 
 - [farzaa/clicky](https://github.com/farzaa/clicky) (MIT, © Farza): the open-source original of HeyClicky. Pip reimplements its ideas (push-to-talk, `[POINT:x,y:label:screenN]` tags, cursor overlay, the Worker proxy routes) for Windows. No Swift code is copied.
 - HeyClicky v1.0.52 (closed source): studied for architecture only (route names, the tag grammar, the Jev and Codex wiring). None of its prompts, assets or code are included.
+
+## Datasets (training and evaluation, downloaded on your PC, not shipped)
+
+| Dataset | Use | License |
+| --- | --- | --- |
+| IndicVoices, Kathbath, Shrutilipi, Svarah, Lahaja (AI4Bharat) | training (train splits) and evaluation (test splits) | CC-BY-4.0 |
+| FLEURS (Google) | training and evaluation | CC-BY-4.0 |
+| MUCS 2021 Hindi-English, HiACC | Hinglish | per their releases |
+| DISCO | disfluency correction for the cleanup model | per its release |

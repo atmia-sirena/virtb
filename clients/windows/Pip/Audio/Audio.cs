@@ -126,15 +126,25 @@ public sealed class MicRecorder : IDisposable
     }
 }
 
-/// <summary>One push-to-talk transcription against the backend's local Parakeet (POST /v2/asr/sessions...).</summary>
+/// <summary>
+/// One push-to-talk transcription (POST /v2/asr/sessions...). The backend runs it
+/// on the GPU speech server (language ID, Indian languages) or Parakeet on the CPU.
+/// </summary>
 public sealed class SpeechToText : IDisposable
 {
     public event Action<string>? PartialTranscript;
+    /// <summary>The language the speech server detected (en, hi, hinglish, ta…), once known.</summary>
+    public event Action<string>? LanguageDetected;
     private readonly BackendClient backend;
     private readonly MicRecorder recorder = new();
     private readonly Channel<byte[]> chunks = Channel.CreateUnbounded<byte[]>();
     private string? sessionId;
     private Task? pump;
+    private string? detectedLanguage;
+
+    /// <summary>The finished session, so cleanup can use its language and timed words.</summary>
+    public string? LastSessionId { get; private set; }
+    public string? Language { get; private set; }
 
     public event Action<float>? LevelChanged
     {
@@ -148,12 +158,14 @@ public sealed class SpeechToText : IDisposable
         recorder.ChunkReady += chunk => chunks.Writer.TryWrite(chunk);
     }
 
-    public async Task StartAsync()
+    /// <param name="options">Optional session options: { app, language, languages, context }.</param>
+    public async Task StartAsync(object? options = null)
     {
         while (chunks.Reader.TryRead(out _)) { }
+        detectedLanguage = null;
         // Start the mic before the session request returns so no words are lost.
         recorder.Start();
-        var created = await backend.PostAsync<AsrSessionDto>("v2/asr/sessions", new { });
+        var created = await backend.PostAsync<AsrSessionDto>("v2/asr/sessions", options ?? new { });
         sessionId = created?.SessionId;
         pump = Task.Run(PumpAsync);
     }
@@ -168,6 +180,11 @@ public sealed class SpeechToText : IDisposable
             {
                 var result = await backend.PostBytesAsync($"v2/asr/sessions/{sessionId}/audio", chunk);
                 if (result.TryGetProperty("text", out var text) && text.GetString() is { Length: > 0 } partial) PartialTranscript?.Invoke(partial);
+                if (result.TryGetProperty("language", out var language) && language.GetString() is { Length: > 0 } code && code != detectedLanguage)
+                {
+                    detectedLanguage = code;
+                    LanguageDetected?.Invoke(code);
+                }
             }
             catch
             {
@@ -177,13 +194,16 @@ public sealed class SpeechToText : IDisposable
     }
 
     /// <summary>Stops the mic and returns the final transcript.</summary>
-    public async Task<string> FinishAsync()
+    /// <param name="language">Overrides language ID (the user switched language while speaking).</param>
+    public async Task<string> FinishAsync(string? language = null)
     {
         recorder.Stop();
         chunks.Writer.TryWrite(Array.Empty<byte>());
         if (pump is not null) await pump;
         if (sessionId is null) return "";
-        var result = await backend.PostAsync<AsrSessionDto>($"v2/asr/sessions/{sessionId}/finish", new { });
+        var result = await backend.PostAsync<AsrSessionDto>($"v2/asr/sessions/{sessionId}/finish", language is null ? new { } : (object)new { language });
+        LastSessionId = sessionId;
+        Language = result?.Language;
         sessionId = null;
         return result?.Text?.Trim() ?? "";
     }
@@ -201,6 +221,7 @@ public sealed class SpeechToText : IDisposable
     {
         public string? SessionId { get; set; }
         public string? Text { get; set; }
+        public string? Language { get; set; }
     }
 }
 

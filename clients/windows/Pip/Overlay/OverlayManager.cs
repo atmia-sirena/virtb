@@ -80,6 +80,7 @@ public sealed class OverlayManager
     public void SetState(BuddyState state) => buddy.SetState(state);
     public void SetLevel(float level) => buddy.SetLevel(level);
     public void SetCaption(string? text) => buddy.SetCaption(text);
+    public void SetLanguage(string? chip) => buddy.SetLanguage(chip);
 
     private void OnFrame(object? sender, EventArgs e)
     {

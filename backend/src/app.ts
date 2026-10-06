@@ -126,7 +126,7 @@ export function createApp(): Hono {
   });
   app.post("/v2/asr/sessions/:id/finish", async (context) => {
     try {
-      const result = await finishAsrSession(context.req.param("id"));
+      const result = await finishAsrSession(context.req.param("id"), (await jsonBody<{ language?: string }>(context)).language);
       return result ? context.json(result) : context.json({ error: "unknown session" }, 404);
     } catch (error) {
       return context.json({ error: (error as Error).message }, 503);

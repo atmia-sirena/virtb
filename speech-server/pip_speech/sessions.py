@@ -76,13 +76,16 @@ class Sessions:
             session.worker.start()
         return {"text": session.partial_text, "language": session.language}
 
-    def finish(self, session_id: str) -> dict | None:
+    def finish(self, session_id: str, language: str | None = None) -> dict | None:
         with self.lock:
             session = self.items.pop(session_id, None)
         if session is None:
             return None
         if session.worker is not None:
             session.worker.join(timeout=5)
+        if language:
+            # The user switched language mid-utterance (Pip's language-cycle hotkey).
+            session.request.language = language
         # Language ID runs again on the whole utterance unless it was forced.
         return self.router.final(session.audio(), session.request)
 

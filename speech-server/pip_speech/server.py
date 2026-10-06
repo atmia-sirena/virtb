@@ -2,7 +2,7 @@
 
 POST /sessions                 {languages, language?, prior?, context?} -> {sessionId}
 POST /sessions/{id}/audio      raw PCM16 16 kHz mono -> {text, language}
-POST /sessions/{id}/finish     -> {text, words, language, confidence, model, timings}
+POST /sessions/{id}/finish     {language?} -> {text, words, language, confidence, model, timings}
 DELETE /sessions/{id}
 POST /transcribe?languages=..  WAV/FLAC body (or PCM16 with ?encoding=pcm_s16le; ?engine= forces one model) -> as finish
 POST /lid                      WAV body -> {language, probabilities}
@@ -13,6 +13,7 @@ GET  /health
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -93,9 +94,16 @@ def create_app(registry: Registry | None = None, warm: list[str] | None = None, 
         return sessions.append(session, await request.body())
 
     @app.post("/sessions/{session_id}/finish")
-    async def finish(session_id: str) -> dict[str, Any]:
+    async def finish(session_id: str, request: HttpRequest) -> dict[str, Any]:
+        body = await request.body()
+        language = None
+        if body:
+            try:
+                language = json.loads(body).get("language")
+            except (ValueError, AttributeError):
+                language = None
         try:
-            result = await run_in_threadpool(sessions.finish, session_id)
+            result = await run_in_threadpool(sessions.finish, session_id, language)
         except RuntimeError as error:
             raise HTTPException(503, str(error)) from error
         if result is None:
