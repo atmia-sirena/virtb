@@ -1,0 +1,49 @@
+{
+  "_comment": "Which model handles which language. Each route lists engines in order; the first one that is installed wins. eval/run.py --bakeoff rewrites the order from measured WER (copy to %APPDATA%\\Pip\\speech-routing.json to override). Pre-bake-off defaults come from published results: Qwen3-ASR for English/Hindi/Hinglish code-switching, IndicConformer/SraVaani for the other Indian languages, Whisper large-v3 for Indian-accented English and language ID.",
+  "lid": ["whisper-large-v3", "whisper-medium"],
+  "ensembleBelow": 0.6,
+  "hinglishLatinShare": 0.15,
+  "priorWeight": 2.0,
+  "engines": {
+    "qwen3-asr-1.7b": { "kind": "qwen3-asr", "model": "Qwen/Qwen3-ASR-1.7B", "languages": ["en", "hi", "hinglish"], "longAudio": true },
+    "qwen3-asr-0.6b": { "kind": "qwen3-asr", "model": "Qwen/Qwen3-ASR-0.6B", "languages": ["en", "hi", "hinglish"], "longAudio": true },
+    "pip-qwen3-asr-india": { "kind": "qwen3-asr", "model": "pip-qwen3-asr-india", "languages": ["en", "hi", "hinglish", "ta", "te", "pa"], "longAudio": true, "_comment": "your fine-tune from training/recipes/qwen3_asr_lora.py" },
+    "indicconformer-rnnt": { "kind": "indic-conformer", "model": "ai4bharat/indic-conformer-600m-multilingual", "decoder": "rnnt" },
+    "indicconformer-ctc": { "kind": "indic-conformer", "model": "ai4bharat/indic-conformer-600m-multilingual", "decoder": "ctc" },
+    "sravaani": { "kind": "nemo", "model": "sravaani-1.0.nemo", "languages": ["*"] },
+    "sravaani-onnx": { "kind": "sherpa", "family": "nemo-transducer", "model": "sravaani-1.0-onnx", "languages": ["*"] },
+    "pip-sravaani-india": { "kind": "sherpa", "family": "nemo-transducer", "model": "pip-sravaani-india-onnx", "languages": ["*"], "_comment": "your fine-tune from training/recipes/sravaani_finetune.py" },
+    "whisper-large-v3": { "kind": "faster-whisper", "model": "Systran/faster-whisper-large-v3", "languages": ["en", "hi", "hinglish", "ta", "te", "pa", "bn", "mr", "gu", "kn", "ml", "ur", "ne", "as", "or"], "longAudio": true },
+    "whisper-medium": { "kind": "faster-whisper", "model": "Systran/faster-whisper-medium", "languages": ["en", "hi"], "longAudio": true },
+    "indicwhisper-hi": { "kind": "faster-whisper", "model": "indicwhisper-hi-ct2", "languages": ["hi"], "longAudio": true, "_comment": "IndicWhisper (AI4Bharat/vistaar) converted with ct2-transformers-converter; see pip_speech/download.py" },
+    "shunya-hinglish": { "kind": "faster-whisper", "model": "shunya-zero-stt-hinglish-ct2", "languages": ["hinglish"], "longAudio": true },
+    "qwen3-asr-0.6b-onnx": { "kind": "sherpa", "family": "qwen3-asr", "model": "sherpa-onnx-qwen3-asr-0.6B-int8-2026-03-25", "languages": ["en", "hi", "hinglish"], "longAudio": true },
+    "parakeet-v2": { "kind": "sherpa", "family": "nemo-transducer", "model": "sherpa-onnx-nemo-parakeet-tdt-0.6b-v2-int8", "languages": ["en"] },
+    "omnilingual-300m": { "kind": "sherpa", "family": "omnilingual-ctc", "model": "sherpa-onnx-omnilingual-asr-1600-languages-300M-ctc-int8-2025-11-12", "languages": ["*"] }
+  },
+  "routes": {
+    "en": {
+      "final": ["pip-qwen3-asr-india", "qwen3-asr-1.7b", "whisper-large-v3", "parakeet-v2"],
+      "partial": ["qwen3-asr-0.6b", "qwen3-asr-0.6b-onnx", "parakeet-v2", "whisper-medium"],
+      "second": ["whisper-large-v3", "parakeet-v2"]
+    },
+    "hi": {
+      "final": ["pip-qwen3-asr-india", "qwen3-asr-1.7b", "indicconformer-rnnt", "indicwhisper-hi", "whisper-large-v3"],
+      "partial": ["indicconformer-ctc", "qwen3-asr-0.6b", "qwen3-asr-0.6b-onnx"],
+      "second": ["indicconformer-rnnt", "indicwhisper-hi"]
+    },
+    "hinglish": {
+      "final": ["pip-qwen3-asr-india", "qwen3-asr-1.7b", "shunya-hinglish", "whisper-large-v3"],
+      "partial": ["qwen3-asr-0.6b", "qwen3-asr-0.6b-onnx", "indicconformer-ctc"],
+      "second": ["shunya-hinglish", "whisper-large-v3"]
+    },
+    "ta": { "final": ["pip-sravaani-india", "pip-qwen3-asr-india", "sravaani-onnx", "sravaani", "indicconformer-rnnt"], "partial": ["indicconformer-ctc"], "second": ["indicconformer-rnnt"] },
+    "te": { "final": ["pip-sravaani-india", "pip-qwen3-asr-india", "sravaani-onnx", "sravaani", "indicconformer-rnnt"], "partial": ["indicconformer-ctc"], "second": ["indicconformer-rnnt"] },
+    "pa": { "final": ["pip-sravaani-india", "pip-qwen3-asr-india", "sravaani-onnx", "sravaani", "indicconformer-rnnt"], "partial": ["indicconformer-ctc"], "second": ["indicconformer-rnnt"] },
+    "*": {
+      "final": ["pip-sravaani-india", "sravaani-onnx", "sravaani", "indicconformer-rnnt", "omnilingual-300m"],
+      "partial": ["indicconformer-ctc", "omnilingual-300m"],
+      "second": ["indicconformer-rnnt", "omnilingual-300m"]
+    }
+  }
+}
