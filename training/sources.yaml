@@ -1,0 +1,29 @@
+# Training corpora (train splits only; eval/datasets.yaml lists the held-out test sets).
+# `hours` caps how much of each source goes into the mix (data/mix.py).
+# Entries marked `verify: true`: check the id/config on the dataset page and accept its
+# terms first (free Hugging Face account; `huggingface-cli login`).
+
+sources:
+  indicvoices-hi:  { repo: ai4bharat/IndicVoices, config: hindi, split: train, text: text, language: hi, hours: 1200, license: CC-BY-4.0, verify: true }
+  indicvoices-ta:  { repo: ai4bharat/IndicVoices, config: tamil, split: train, text: text, language: ta, hours: 800, license: CC-BY-4.0, verify: true }
+  indicvoices-te:  { repo: ai4bharat/IndicVoices, config: telugu, split: train, text: text, language: te, hours: 800, license: CC-BY-4.0, verify: true }
+  indicvoices-pa:  { repo: ai4bharat/IndicVoices, config: punjabi, split: train, text: text, language: pa, hours: 500, license: CC-BY-4.0, verify: true }
+  kathbath-hi:     { repo: ai4bharat/kathbath, config: hindi, split: train, text: text, language: hi, hours: 300, license: CC-BY-4.0, verify: true }
+  kathbath-ta:     { repo: ai4bharat/kathbath, config: tamil, split: train, text: text, language: ta, hours: 300, license: CC-BY-4.0, verify: true }
+  kathbath-te:     { repo: ai4bharat/kathbath, config: telugu, split: train, text: text, language: te, hours: 300, license: CC-BY-4.0, verify: true }
+  kathbath-pa:     { repo: ai4bharat/kathbath, config: punjabi, split: train, text: text, language: pa, hours: 200, license: CC-BY-4.0, verify: true }
+  shrutilipi-hi:   { repo: ai4bharat/Shrutilipi, config: hindi, split: train, text: text, language: hi, hours: 400, license: CC-BY-4.0, verify: true }
+  fleurs-hi:       { repo: google/fleurs, config: hi_in, split: train, text: transcription, language: hi, hours: 20, license: CC-BY-4.0 }
+  fleurs-ta:       { repo: google/fleurs, config: ta_in, split: train, text: transcription, language: ta, hours: 20, license: CC-BY-4.0 }
+  fleurs-te:       { repo: google/fleurs, config: te_in, split: train, text: transcription, language: te, hours: 20, license: CC-BY-4.0 }
+  fleurs-pa:       { repo: google/fleurs, config: pa_in, split: train, text: transcription, language: pa, hours: 20, license: CC-BY-4.0 }
+  fleurs-en:       { repo: google/fleurs, config: en_us, split: train, text: raw_transcription, language: en, hours: 20, license: CC-BY-4.0 }
+  # Indian-accented English and code-switching: keep English strong while adding Indic.
+  indicvoices-en:  { repo: ai4bharat/IndicVoices, config: english, split: train, text: text, language: en, hours: 400, license: CC-BY-4.0, verify: true, note: "if your IndicVoices release has no English config, use Common Voice English with Indian accents (manual)" }
+  mucs-hinglish:   { manual: true, language: hinglish, hours: 90, note: "MUCS 2021 Hindi-English train set from the challenge organizers; Devanagari targets are romanized by data/hinglish_targets.py" }
+  # Synthetic: entity-dense, disfluent dictation in every language (eval/generate_dictation_set.py --split train).
+  pip-dictation-train: { local: "{eval_data}/pip-dictation-train/manifest.jsonl", hours: 300, license: own }
+
+# Disfluency correction text pairs for the cleanup LLM (recipe C).
+cleanup:
+  disco:           { manual: true, note: "DISCO (Interspeech 2023, English/Hindi disfluency correction): download from the paper's release, save as data/disco.jsonl with fields spoken, final, language" }

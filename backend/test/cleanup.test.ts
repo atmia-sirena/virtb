@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanTranscript } from "../src/speech/cleanup/index.js";
+import { cleanTranscript, prepareEdit } from "../src/speech/cleanup/index.js";
 import { indianGrouping } from "../src/speech/cleanup/deterministic.js";
 import { parseNumberWords, renderNumbered, replacementAllowed, verifyAndApply } from "../src/speech/cleanup/llm-edit.js";
 import { romanizeDevanagariWord, romanizeTokens } from "../src/speech/cleanup/script.js";
@@ -150,5 +150,14 @@ describe("Hinglish romanization rules", () => {
   it("turns dandas into full stops", async () => {
     const result = await romanizeTokens(tokenize("ठीक है।"));
     expect(detokenize(result.tokens)).toBe("theek hai.");
+  });
+});
+
+describe("edit prompt for training pairs", () => {
+  it("returns the numbered words the LLM sees after the rules", () => {
+    const prepared = prepareEdit({ text: "um kal meeting 5 baje hai matlab 6 baje hai", language: "hinglish" });
+    expect(prepared.words).toEqual(["Kal", "meeting", "5", "baje", "hai", "matlab", "6", "baje", "hai"]);
+    expect(prepared.user).toContain("WORDS: [0]Kal [1]meeting");
+    expect(prepared.system).toContain("edit operations");
   });
 });

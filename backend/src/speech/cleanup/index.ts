@@ -133,3 +133,21 @@ export async function cleanTranscript(request: CleanTranscriptRequest): Promise<
 
   return { text: detokenize(tokens), language, applied, llm, ...(reason ? { reason } : {}) };
 }
+
+/** What the LLM edit pass sees for a transcript: for building training pairs (training/data/cleanup_pairs.py). */
+export function prepareEdit(request: CleanTranscriptRequest): { deterministic: string; words: string[]; system: string; user: string } {
+  const language = lexiconLanguageFor(request.language);
+  const script = request.script ?? (language === "hinglish" ? "roman" : "native");
+  const sourceTokens = request.words && request.words.length > 0 ? tokenizeTimed(request.words) : tokenize(request.text);
+  const deterministic = runDeterministic(sourceTokens, { language, script, finalPunctuation: !request.terminal, casing: !request.terminal });
+  const lexicon = loadLexicon(language);
+  const user = buildEditPrompt({
+    tokens: deterministic.tokens,
+    language,
+    app: request.appName,
+    terminal: request.terminal,
+    dictionary: request.dictionary ?? [],
+    contextFillers: lexicon.llmFillers.filter((filler) => splitPhrase(filler).length > 0),
+  });
+  return { deterministic: detokenize(deterministic.tokens), words: deterministic.tokens.filter(isWord).map((token) => token.text), system: loadPrompt("dictation-cleanup"), user };
+}

@@ -18,6 +18,7 @@ import { webSearch } from "./lib/websearch.js";
 import { runTalkTurn, type TalkRequest } from "./talk/chat.js";
 import { clickyChat, type AnthropicRequest } from "./talk/clicky-compat.js";
 import { cleanupDictation, updateDictionary } from "./talk/dictation.js";
+import { prepareEdit } from "./speech/cleanup/index.js";
 import { describeSpeechLanguages, cycleLanguage, speechLanguages, updateSpeechLanguages, type LanguageSettingsUpdate } from "./speech/languages.js";
 import { savePersonalClip } from "./speech/personal-eval.js";
 import { appendAsrAudio, asrStatus, cancelAsrSession, finishAsrSession, startAsrSession, transcribeWavFile, type AsrSessionOptions } from "./speech/asr.js";
@@ -162,6 +163,10 @@ export function createApp(): Hono {
   });
 
   // --- dictation ----------------------------------------------------------------
+  app.post("/v2/dictation/edit-prompt", async (context) => {
+    const body = await jsonBody<{ text?: string; language?: string; app?: string; terminal?: boolean; dictionary?: string[] }>(context);
+    return context.json(prepareEdit({ text: body.text ?? "", language: body.language, appName: body.app, terminal: body.terminal, dictionary: body.dictionary }));
+  });
   app.post("/v2/dictation/cleanup", async (context) => context.json(await cleanupDictation(await jsonBody(context))));
   app.get("/v2/dictation/dictionary", (context) => context.json({ dictionary: readSettings().dictation.dictionary }));
   app.post("/v2/dictation/dictionary", async (context) => context.json({ dictionary: updateDictionary(await jsonBody(context)) }));

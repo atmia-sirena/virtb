@@ -1,0 +1,32 @@
+[project]
+name = "pip-train"
+version = "0.1.0"
+description = "Fine-tuning Pip's speech and cleanup models for Indian languages on one local GPU"
+requires-python = ">=3.11,<3.13"
+license = { text = "MIT" }
+dependencies = ["numpy>=1.26", "soundfile>=0.12", "pyyaml>=6", "librosa>=0.10"]
+
+[project.optional-dependencies]
+data = ["datasets>=3.0", "huggingface_hub>=0.25"]
+# Recipe A: Qwen3-ASR full fine-tune (Alibaba's official SFT script, vendored).
+qwen = ["qwen-asr>=0.0.6", "datasets>=3.0", "torch>=2.7"]
+# Recipe B: SraVaani / IndicConformer (NeMo) + ONNX export for sherpa.
+nemo = ["nemo_toolkit[asr]>=2.3", "onnx>=1.16", "onnxruntime>=1.20"]
+# Recipe C: the cleanup LLM (LoRA on Qwen3-8B).
+llm = ["torch>=2.7", "transformers>=4.51", "peft>=0.13", "trl>=0.12", "datasets>=3.0", "accelerate>=1.0"]
+dev = ["pytest>=8"]
+
+[tool.uv]
+conflicts = [[{ extra = "qwen" }, { extra = "nemo" }], [{ extra = "qwen" }, { extra = "llm" }]]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

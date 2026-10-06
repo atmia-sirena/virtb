@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .engines.base import Engine
-from .paths import state_dir
+from .paths import is_local, state_dir
 
 log = logging.getLogger("pip-speech")
 
@@ -72,6 +72,9 @@ class Registry:
     def usable(self, engine_id: str) -> bool:
         engine = self.engines.get(engine_id)
         if engine is None or engine_id in self.broken:
+            return False
+        # Your fine-tunes and converted models exist only on disk; never try to download them.
+        if engine.config.get("localOnly") and not is_local(engine.config.get("model", "")):
             return False
         try:
             return engine.available()

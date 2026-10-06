@@ -99,3 +99,18 @@ def test_sherpa_token_merge():
     words = merge_tokens(["▁kal", "▁mee", "ting", "▁hai"], [0.0, 0.4, 0.6, 0.9])
     assert [word.w for word in words] == ["kal", "meeting", "hai"]
     assert words[1].start == 0.4 and words[1].end == 0.9
+
+
+def test_local_only_engines_are_skipped_until_installed(tmp_path, monkeypatch):
+    monkeypatch.setenv("PIP_MODELS_DIR", str(tmp_path))
+    config = routing()
+    config["engines"]["mine"] = {"kind": "fake", "model": "pip-qwen3-asr-india", "localOnly": True}
+    config["routes"]["en"]["final"] = ["mine", "qwen"]
+    registry = Registry(config, device="cpu")
+    assert Router(registry).final(tone(1.0), Request(languages=["en"]))["model"] == "qwen"
+    (tmp_path / "pip-qwen3-asr-india").mkdir()
+    assert Router(Registry(config, device="cpu")).final(tone(1.0), Request(languages=["en"]))["model"] == "mine"
+
+
+def test_a_hinglish_fine_tune_label_counts_as_hinglish():
+    assert lid.hinglish_or_hindi("कल मिलते हैं", ["hinglish"], ["hi", "hinglish"], None, 0.15) == "hinglish"

@@ -50,7 +50,8 @@ def hinglish_or_hindi(text: str, detected: list[str], allowed: list[str], prior:
         return "hinglish"
     if not wants_hinglish:
         return "hi"
-    mixed = ("en" in detected and "hi" in detected) or latin_share(text) >= latin_threshold
+    # Qwen3-ASR reports "Hindi,English" for code-switched speech; a Pip fine-tune reports "Hinglish".
+    mixed = "hinglish" in detected or ("en" in detected and "hi" in detected) or latin_share(text) >= latin_threshold
     if mixed:
         return "hinglish"
     return "hinglish" if prior == "hinglish" and latin_share(text) > 0 else "hi"

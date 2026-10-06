@@ -143,7 +143,7 @@ class Router:
 
         language_out = route
         if base(route) == "hi" and not forced:
-            detected = [base(normalize(code)) for code in result.detail.get("detected", [])] if isinstance(result.detail.get("detected"), list) else []
+            detected = [normalize(code) for code in result.detail.get("detected", [])] if isinstance(result.detail.get("detected"), list) else []
             language_out = lid.hinglish_or_hindi(result.text, detected, [normalize(code) for code in request.languages], normalize(request.prior) if request.prior else None, float(self.settings.get("hinglishLatinShare", 0.15)))
 
         words = [Word(word.w, None if word.start is None else round(word.start + offset, 3), None if word.end is None else round(word.end + offset, 3), word.conf) for word in result.words]
