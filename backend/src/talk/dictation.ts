@@ -5,6 +5,7 @@
 // inserted.
 import { readSettings, updateSettings } from "../config.js";
 import type { ActiveApp } from "../lib/skills.js";
+import { takeAsrResult } from "../speech/asr.js";
 import { cleanTranscript, type CleanTranscriptResult, type Editor } from "../speech/cleanup/index.js";
 import type { TimedWord } from "../speech/cleanup/tokens.js";
 
@@ -22,6 +23,8 @@ export interface CleanupRequest {
   language?: string;
   /** Timed words with confidences from the speech model, when it gave them. */
   words?: TimedWord[];
+  /** The /v2/asr session the text came from: its detected language and timed words are used. */
+  sessionId?: string;
 }
 
 export interface CleanupResponse {
@@ -47,11 +50,15 @@ export async function cleanupDictation(request: CleanupRequest, editor?: Editor)
   const terminal = isTerminalApp(request.app);
   const finish = (text: string) => (terminal ? collapseForTerminal(removeDashes(text)) : removeDashes(text));
   if (!settings.dictation.cleanup || !raw) return { text: finish(raw), cleaned: false };
-  const language = request.language ?? settings.speech.perApp[(request.app?.process ?? "").toLowerCase()] ?? settings.speech.primaryLanguage;
+  const recognized = takeAsrResult(request.sessionId);
+  const appKey = (request.app?.process ?? "").toLowerCase().replace(/\.exe$/, "");
+  const language = request.language ?? recognized?.language ?? settings.speech.perApp[appKey] ?? settings.speech.primaryLanguage;
+  // Timed words only describe the text if the client didn't change it.
+  const words = request.words ?? (recognized?.words && recognized.text.trim() === raw ? recognized.words : undefined);
   try {
     const result = await cleanTranscript({
       text: raw,
-      words: request.words,
+      words,
       language,
       script: settings.speech.script[language],
       appName: request.app?.name ?? request.app?.process,

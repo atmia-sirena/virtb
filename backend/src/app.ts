@@ -18,7 +18,9 @@ import { webSearch } from "./lib/websearch.js";
 import { runTalkTurn, type TalkRequest } from "./talk/chat.js";
 import { clickyChat, type AnthropicRequest } from "./talk/clicky-compat.js";
 import { cleanupDictation, updateDictionary } from "./talk/dictation.js";
-import { appendAsrAudio, asrStatus, cancelAsrSession, finishAsrSession, startAsrSession, transcribeWavFile } from "./speech/asr.js";
+import { describeSpeechLanguages, cycleLanguage, speechLanguages, updateSpeechLanguages, type LanguageSettingsUpdate } from "./speech/languages.js";
+import { savePersonalClip } from "./speech/personal-eval.js";
+import { appendAsrAudio, asrStatus, cancelAsrSession, finishAsrSession, startAsrSession, transcribeWavFile, type AsrSessionOptions } from "./speech/asr.js";
 import { speechModels, isSpeechModelInstalled, kokoroVoices } from "./speech/catalog.js";
 import { synthesize, ttsStatus } from "./speech/tts.js";
 import { systemOne, type SystemOneRequest } from "./talk/jev.js";
@@ -113,7 +115,10 @@ export function createApp(): Hono {
   };
   app.post("/tts", ttsHandler);
   app.post("/v2/tts", ttsHandler);
-  app.post("/v2/asr/sessions", (context) => context.json({ sessionId: startAsrSession(), sampleRate: 16000, encoding: "pcm_s16le" }));
+  app.post("/v2/asr/sessions", async (context) => {
+    const session = await startAsrSession(await jsonBody<AsrSessionOptions>(context));
+    return context.json({ sessionId: session.id, engine: session.engine, sampleRate: 16000, encoding: "pcm_s16le" });
+  });
   app.post("/v2/asr/sessions/:id/audio", async (context) => {
     const result = await appendAsrAudio(context.req.param("id"), new Uint8Array(await context.req.arrayBuffer()));
     return result ? context.json(result) : context.json({ error: "unknown session" }, 404);
@@ -129,6 +134,24 @@ export function createApp(): Hono {
   app.delete("/v2/asr/sessions/:id", (context) => {
     cancelAsrSession(context.req.param("id"));
     return context.json({ ok: true });
+  });
+  // --- languages (Home → Settings → Languages, the client's language chip and cycle hotkey) ---
+  app.get("/v2/speech/languages", async (context) => context.json(await describeSpeechLanguages()));
+  app.put("/v2/speech/languages", async (context) => context.json(updateSpeechLanguages(await jsonBody<LanguageSettingsUpdate>(context))));
+  app.post("/v2/speech/language-cycle", async (context) => {
+    const body = await jsonBody<{ app?: { process?: string }; current?: string }>(context);
+    const code = cycleLanguage(body.app?.process, body.current);
+    return context.json({ language: code, chip: speechLanguages.find((language) => language.code === code)?.chip ?? code });
+  });
+  // Personal test set (Phase 0): clips plus what you meant, scored by eval/run.py --set personal.
+  app.post("/v2/eval/clips", async (context) => {
+    const body = await jsonBody<{ audio?: string; reference?: string; language?: string; app?: string }>(context);
+    if (!body.audio || !body.reference) return context.json({ error: "audio (base64 WAV) and reference required" }, 400);
+    try {
+      return context.json(savePersonalClip({ audio: body.audio, reference: body.reference, language: body.language, app: body.app }));
+    } catch (error) {
+      return context.json({ error: (error as Error).message }, 400);
+    }
   });
   app.post("/v2/dictation/transcribe", async (context) => {
     try {

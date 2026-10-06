@@ -46,3 +46,9 @@ def test_transcribe_a_wav_file(registry):
 def test_xlit_reports_when_indicxlit_is_missing(registry):
     response = client(registry).post("/xlit", json={"words": ["नमस्ते"], "source": "hi"})
     assert response.status_code in (200, 503)
+
+
+def test_warms_models_for_your_languages(registry):
+    with TestClient(create_app(registry, warm_languages=["en", "hinglish", "ta"])):
+        pass
+    assert {"qwen", "fast", "conformer", "lid"} <= registry.loaded

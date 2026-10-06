@@ -9,6 +9,7 @@ import { createApp, pipVersion } from "./app.js";
 import { refreshInstalledModels, resolveModel } from "./lib/models.js";
 import { warmModel } from "./lib/ollama.js";
 import { asrStatus, getRecognizer } from "./speech/asr.js";
+import { startSpeechServer } from "./speech/sidecar.js";
 import { ttsStatus, warmTts } from "./speech/tts.js";
 
 loadDotEnvFile();
@@ -47,6 +48,8 @@ async function warmSpeech(): Promise<void> {
   console.log(`[pip] speech ready (${asrStatus().model}, ${ttsStatus().model}) in ${Date.now() - startedAt} ms`);
 }
 
+// The GPU speech server for Indian languages, when installed (speech-server/).
+if (startSpeechServer()) console.log("[pip] starting the speech server (Indian-language dictation on the GPU)");
 void warmUp();
 void warmSpeech().catch((error) => console.warn("[pip] speech warm-up failed:", error.message));
 startRoutineScheduler();

@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field
 
 from . import xlit
 from .audio import decode_file, pcm16_to_float
+from .languages import base, normalize
 from .registry import Registry, load_routing
 from .router import Request, Router
 from .sessions import Sessions
@@ -53,7 +54,7 @@ def default_device() -> str:
         return "cpu"
 
 
-def create_app(registry: Registry | None = None, warm: list[str] | None = None) -> FastAPI:
+def create_app(registry: Registry | None = None, warm: list[str] | None = None, warm_languages: list[str] | None = None) -> FastAPI:
     registry = registry or Registry(load_routing(), device=default_device())
     router = Router(registry)
     sessions = Sessions(router)
@@ -62,6 +63,12 @@ def create_app(registry: Registry | None = None, warm: list[str] | None = None) 
     async def lifespan(_: FastAPI):
         # Load the champions for your languages now so the first dictation is fast.
         for engine_id in warm or []:
+            await run_in_threadpool(registry.get, engine_id)
+        for language in warm_languages or []:
+            route = router.route_language(base(normalize(language)), Request(languages=warm_languages or []))
+            for role in ("final", "partial"):
+                await run_in_threadpool(registry.pick, route, role)
+        for engine_id in registry.routing.get("lid", [])[:1]:
             await run_in_threadpool(registry.get, engine_id)
         yield
 
@@ -138,11 +145,14 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=int(os.environ.get("PIP_SPEECH_PORT", "8790")))
     parser.add_argument("--warm", default=os.environ.get("PIP_SPEECH_WARM", ""), help="comma-separated engine ids to load at start")
+    parser.add_argument("--warm-languages", default="", help="load the final and live-text models for these languages at start (en,hi,hinglish,ta...)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="[speech] %(message)s")
     import uvicorn
 
-    uvicorn.run(create_app(warm=[engine for engine in args.warm.split(",") if engine]), host=args.host, port=args.port, log_level="warning")
+    warm = [engine for engine in args.warm.split(",") if engine]
+    warm_languages = [language for language in args.warm_languages.split(",") if language]
+    uvicorn.run(create_app(warm=warm, warm_languages=warm_languages), host=args.host, port=args.port, log_level="warning")
 
 
 if __name__ == "__main__":
