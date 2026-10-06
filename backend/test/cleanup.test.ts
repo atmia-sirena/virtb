@@ -25,6 +25,8 @@ describe("rules: English (Indian English)", () => {
     ["we raised 5 lakh rupees this month", "We raised ₹5 lakh this month."],
     ["no wait I can't come today", "No wait I can't come today."],
     ["see you at the dot", "See you at the dot."],
+    ["can you call me back after the meeting", "Can you call me back after the meeting?"],
+    ["please share the deck by 3 30 pm sorry I mean 4 pm", "Please share the deck by 4 pm."],
   ])("%s", async (input, expected) => {
     expect(await rules(input, "en-IN")).toBe(expected);
   });
@@ -55,6 +57,7 @@ describe("rules: Hinglish (romanized)", () => {
     ["nahi nahi main nahi aaunga", "Nahi nahi main nahi aaunga."],
     ["haan theek hai naya line kal milte hain", "Haan theek hai\nKal milte hain."],
     ["maine galti se file delete kar di", "Maine galti se file delete kar di."],
+    ["bhai aaj raat ka plan kya hai", "Bhai aaj raat ka plan kya hai?"],
   ])("%s", async (input, expected) => {
     expect(await rules(input, "hinglish")).toBe(expected);
   });

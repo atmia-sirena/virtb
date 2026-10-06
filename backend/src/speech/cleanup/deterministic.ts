@@ -86,6 +86,12 @@ function nextBoundary(tokens: Token[], from: number): number {
   return tokens.length;
 }
 
+const spokenNumbers = new Set(["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "fifteen", "twenty", "thirty", "forty", "fifty", "hundred", "thousand", "lakh", "crore"]);
+
+function isNumeric(text: string): boolean {
+  return /^[\d.,:]+$/.test(text) || spokenNumbers.has(looseKey(text));
+}
+
 export function applyStrongBacktracks(tokens: Token[], lexicon: Lexicon, pauseBoundary: number, applied: string[]): Token[] {
   let result = tokens;
   let searchFrom = 0;
@@ -125,6 +131,10 @@ export function applyStrongBacktracks(tokens: Token[], lexicon: Lexicon, pauseBo
       while (deleteFrom > clause && remaining > 0) {
         deleteFrom -= 1;
         if (isWord(result[deleteFrom])) remaining -= 1;
+      }
+      // "by 3 30 pm, sorry I mean 4 pm": a numeric correction replaces the whole number before it.
+      if (isNumeric(afterWords[0].text)) {
+        while (deleteFrom > clause && isWord(result[deleteFrom - 1]) && isNumeric(result[deleteFrom - 1].text)) deleteFrom -= 1;
       }
     } else {
       // A long correction restarts the clause.
@@ -361,6 +371,7 @@ export function applyCurrency(tokens: Token[], language: string, applied: string
 
 export function tidy(tokens: Token[], options: DeterministicOptions): Token[] {
   const language = lexiconLanguageFor(options.language);
+  const lexicon = loadLexicon(options.language);
   const output: Token[] = [];
   for (const token of tokens) {
     const previous = output.at(-1);
@@ -399,9 +410,21 @@ export function tidy(tokens: Token[], options: DeterministicOptions): Token[] {
   const wordCount = output.filter(isWord).length;
   const last = output.at(-1);
   if ((options.finalPunctuation ?? true) && wordCount >= 4 && isWord(last) && !/[@/]/.test(last.text)) {
-    output.push({ text: usesDanda(language, options.script) ? "।" : ".", kind: "punct" });
+    const question = lexicon ? isQuestion(output, lexicon) : false;
+    output.push({ text: question ? "?" : usesDanda(language, options.script) ? "।" : ".", kind: "punct" });
   }
   return output;
+}
+
+/** Is the last sentence a question? English by its opening words, Hindi/Hinglish by a question word anywhere. */
+function isQuestion(tokens: Token[], lexicon: Lexicon): boolean {
+  let start = tokens.length;
+  while (start > 0 && !isBoundary(tokens[start - 1])) start -= 1;
+  const sentence = tokens.slice(start);
+  const firstWord = sentence.findIndex(isWord);
+  if (firstWord < 0) return false;
+  if (lexicon.questionStarts.some((phrase) => matchPhrase(sentence, firstWord, phrase) !== undefined)) return true;
+  return sentence.some((token) => isWord(token) && lexicon.questionWords.has(looseKey(token.text)));
 }
 
 // --- the whole deterministic pass ------------------------------------------

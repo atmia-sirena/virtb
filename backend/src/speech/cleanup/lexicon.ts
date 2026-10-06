@@ -30,6 +30,8 @@ interface LexiconFile {
   format?: Partial<Record<FormatKind, string[]>>;
   domains?: string[];
   llmFillers?: string[];
+  questionStarts?: string[];
+  questionWords?: string[];
 }
 
 export interface Lexicon {
@@ -42,6 +44,10 @@ export interface Lexicon {
   format: { kind: FormatKind; words: string[] }[];
   domains: Set<string>;
   llmFillers: string[];
+  /** A sentence starting with one of these is a question ("can you", "what"). */
+  questionStarts: string[][];
+  /** A sentence containing one of these is a question ("kya", "क्यों"). */
+  questionWords: Set<string>;
 }
 
 /** Languages Pip knows; anything else gets the common lexicon only. */
@@ -94,6 +100,8 @@ export function loadLexicon(language: string | undefined): Lexicon {
     format: [...formatKinds.entries()].map(([kind, words]) => ({ kind, words })),
     domains: new Set(common.domains ?? []),
     llmFillers: [...(specific.llmFillers ?? []), ...(extra.llmFillers ?? [])],
+    questionStarts: [...(common.questionStarts ?? []), ...(specific.questionStarts ?? [])].map(splitPhrase).filter((words) => words.length > 0),
+    questionWords: new Set([...(specific.questionWords ?? []), ...(extra.questionWords ?? [])].map((word) => splitPhrase(word).join(" "))),
   };
   cache.set(name, lexicon);
   return lexicon;

@@ -52,3 +52,12 @@ def test_warms_models_for_your_languages(registry):
     with TestClient(create_app(registry, warm_languages=["en", "hinglish", "ta"])):
         pass
     assert {"qwen", "fast", "conformer", "lid"} <= registry.loaded
+
+
+def test_transcribe_with_a_forced_engine(registry):
+    buffer = io.BytesIO()
+    soundfile.write(buffer, tone(1.5), 16000, format="WAV")
+    http = client(registry)
+    body = http.post("/transcribe?languages=ta&language=ta&engine=conformer", content=buffer.getvalue()).json()
+    assert body["model"] == "conformer"
+    assert http.post("/transcribe?languages=ta&engine=missing", content=buffer.getvalue()).status_code == 503

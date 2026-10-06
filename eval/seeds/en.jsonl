@@ -1,0 +1,14 @@
+{"id": "000", "language": "en", "spoken": "um so I I think we should uh meet tomorrow", "final": "So I think we should meet tomorrow.", "tags": ["filler"]}
+{"id": "001", "language": "en", "spoken": "send the report to rahul scratch that send it to priya", "final": "Send it to priya.", "tags": ["command"]}
+{"id": "002", "language": "en", "spoken": "let's meet at 5 pm no wait 6 pm", "final": "Let's meet at 6 pm.", "tags": ["backtrack"]}
+{"id": "003", "language": "en", "spoken": "my email is atmia at the rate gmail dot com", "final": "My email is atmia@gmail.com", "tags": ["command", "entity"]}
+{"id": "004", "language": "en", "spoken": "hi rahul comma how are you question mark new line see you tomorrow", "final": "Hi rahul, how are you?\nSee you tomorrow.", "tags": ["command"]}
+{"id": "005", "language": "en", "spoken": "things to buy number one milk number two eggs number three bread", "final": "Things to buy\n1. milk\n2. eggs\n3. bread.", "tags": ["command"]}
+{"id": "006", "language": "en", "spoken": "the rent is 25000 rupees this month", "final": "The rent is ₹25,000 this month.", "tags": ["entity"]}
+{"id": "007", "language": "en", "spoken": "we raised 5 lakh rupees in the first round", "final": "We raised ₹5 lakh in the first round.", "tags": ["entity"]}
+{"id": "008", "language": "en", "spoken": "hmm can you uh call me back after the meeting", "final": "Can you call me back after the meeting?", "tags": ["filler"]}
+{"id": "009", "language": "en", "spoken": "the trial period ends on friday", "final": "The trial period ends on friday.", "tags": []}
+{"id": "010", "language": "en", "spoken": "I'll send it on Tuesday actually Wednesday", "final": "I'll send it on Wednesday.", "tags": ["backtrack"]}
+{"id": "011", "language": "en", "spoken": "so I was like thinking we should like order food", "final": "So I was thinking we should order food.", "tags": ["filler"]}
+{"id": "012", "language": "en", "spoken": "please share the deck by 3 30 pm sorry I mean 4 pm", "final": "Please share the deck by 4 pm.", "tags": ["backtrack"]}
+{"id": "013", "language": "en", "spoken": "ummmm okay", "final": "Okay", "tags": ["filler"]}

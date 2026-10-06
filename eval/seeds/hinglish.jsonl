@@ -1,0 +1,12 @@
+{"id": "000", "language": "hinglish", "spoken": "kal meeting 5 baje hai nahi nahi 6 baje hai", "final": "Kal meeting 6 baje hai.", "tags": ["backtrack"]}
+{"id": "001", "language": "hinglish", "spoken": "umm kal ki meeting cancel karo", "final": "Kal ki meeting cancel karo.", "tags": ["filler"]}
+{"id": "002", "language": "hinglish", "spoken": "bhai aaj raat ka plan kya hai", "final": "Bhai aaj raat ka plan kya hai?", "tags": []}
+{"id": "003", "language": "hinglish", "spoken": "dheere dheere chalo yaar", "final": "Dheere dheere chalo yaar.", "tags": []}
+{"id": "004", "language": "hinglish", "spoken": "order ki details bhejo pichhla hata do payment link bhejo", "final": "Payment link bhejo", "tags": ["command"]}
+{"id": "005", "language": "hinglish", "spoken": "maine galti se file delete kar di", "final": "Maine galti se file delete kar di.", "tags": []}
+{"id": "006", "language": "hinglish", "spoken": "haan theek hai naya line kal milte hain", "final": "Haan theek hai\nKal milte hain.", "tags": ["command"]}
+{"id": "007", "language": "hinglish", "spoken": "rent 15000 rupaye hai is mahine", "final": "Rent ₹15,000 hai is mahine.", "tags": ["entity"]}
+{"id": "008", "language": "hinglish", "spoken": "main kal aaunga matlab parso aaunga", "final": "Main parso aaunga.", "tags": ["backtrack"]}
+{"id": "009", "language": "hinglish", "spoken": "iska matlab kya hai bhai", "final": "Iska matlab kya hai bhai?", "tags": []}
+{"id": "010", "language": "hinglish", "spoken": "uh office se nikal raha hoon 10 minute mein pahunchunga", "final": "Office se nikal raha hoon, 10 minute mein pahunchunga.", "tags": ["filler"]}
+{"id": "011", "language": "hinglish", "spoken": "ka- kal milte hain", "final": "Kal milte hain", "tags": ["filler"]}

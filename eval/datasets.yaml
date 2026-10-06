@@ -1,0 +1,47 @@
+# Test sets for Pip's dictation benchmarks. `python prepare.py <set>` downloads a
+# Hugging Face set into %APPDATA%\Pip\eval\data\<set>\ (16 kHz WAV + manifest.jsonl);
+# `python run.py --set <set>` scores it. Test splits only: none of these are used for training.
+#
+# Entries marked `verify: true` have repo ids/configs that change between releases
+# or need you to accept terms on the dataset page first (free account, token in
+# `huggingface-cli login`). prepare.py prints what it found if the id is wrong.
+
+sets:
+  # --- Indian English -------------------------------------------------------
+  svarah:            { source: hf, repo: ai4bharat/Svarah, split: test, text: text, language: en, verify: true }
+  fleurs-en:         { source: hf, repo: google/fleurs, config: en_us, split: test, text: transcription, language: en }
+
+  # --- Hindi --------------------------------------------------------------------
+  fleurs-hi:         { source: hf, repo: google/fleurs, config: hi_in, split: test, text: transcription, language: hi }
+  kathbath-hi:       { source: hf, repo: ai4bharat/kathbath, config: hindi, split: test_known, text: text, language: hi, verify: true }
+  indicvoices-hi:    { source: hf, repo: ai4bharat/IndicVoices, config: hindi, split: valid, text: text, language: hi, verify: true }
+  lahaja:            { source: hf, repo: ai4bharat/lahaja, split: test, text: text, language: hi, verify: true }
+
+  # --- Hinglish (code-switched; scored as romanized Hinglish after cleanup) --------
+  mucs-hinglish:     { source: manual, language: hinglish, note: "MUCS 2021 Hindi-English test set: request it from the challenge organizers, then make a manifest (see README)" }
+  hiacc-hinglish:    { source: manual, language: hinglish, note: "HiACC test set: from its release page; manifest with romanized `text`" }
+
+  # --- Tamil, Telugu, Punjabi ------------------------------------------------------
+  fleurs-ta:         { source: hf, repo: google/fleurs, config: ta_in, split: test, text: transcription, language: ta }
+  fleurs-te:         { source: hf, repo: google/fleurs, config: te_in, split: test, text: transcription, language: te }
+  fleurs-pa:         { source: hf, repo: google/fleurs, config: pa_in, split: test, text: transcription, language: pa }
+  kathbath-ta:       { source: hf, repo: ai4bharat/kathbath, config: tamil, split: test_known, text: text, language: ta, verify: true }
+  kathbath-te:       { source: hf, repo: ai4bharat/kathbath, config: telugu, split: test_known, text: text, language: te, verify: true }
+  kathbath-pa:       { source: hf, repo: ai4bharat/kathbath, config: punjabi, split: test_known, text: text, language: pa, verify: true }
+  indicvoices-ta:    { source: hf, repo: ai4bharat/IndicVoices, config: tamil, split: valid, text: text, language: ta, verify: true }
+  indicvoices-te:    { source: hf, repo: ai4bharat/IndicVoices, config: telugu, split: valid, text: text, language: te, verify: true }
+  indicvoices-pa:    { source: hf, repo: ai4bharat/IndicVoices, config: punjabi, split: valid, text: text, language: pa, verify: true }
+
+  # --- Dictation quality (the Wispr Flow comparison) -----------------------------
+  pip-dictation:     { source: manifest, path: "{data}/pip-dictation/manifest.jsonl", note: "generate_dictation_set.py: synthetic, entity-dense, with fillers and self-corrections" }
+  personal:          { source: manifest, path: "{state}/eval/personal/manifest.jsonl", text: reference, final: reference, note: "recorded in Home -> Settings -> Languages" }
+  cleanup-seeds:     { source: seeds, note: "text-only: spoken transcript -> expected typed text, all languages (eval/seeds/*.jsonl)" }
+
+groups:
+  english: [svarah, fleurs-en]
+  hindi: [fleurs-hi, kathbath-hi, indicvoices-hi, lahaja]
+  hinglish: [mucs-hinglish, hiacc-hinglish]
+  south: [fleurs-ta, fleurs-te, kathbath-ta, kathbath-te, indicvoices-ta, indicvoices-te]
+  punjabi: [fleurs-pa, kathbath-pa, indicvoices-pa]
+  dictation: [pip-dictation, personal, cleanup-seeds]
+  all: [svarah, fleurs-en, fleurs-hi, kathbath-hi, indicvoices-hi, lahaja, mucs-hinglish, hiacc-hinglish, fleurs-ta, fleurs-te, fleurs-pa, kathbath-ta, kathbath-te, kathbath-pa, indicvoices-ta, indicvoices-te, indicvoices-pa, pip-dictation, personal, cleanup-seeds]

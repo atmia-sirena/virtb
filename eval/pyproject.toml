@@ -1,0 +1,24 @@
+[project]
+name = "pip-eval"
+version = "0.1.0"
+description = "Benchmarks for Pip's dictation: WER/CER per Indian language, cleanup quality, latency"
+requires-python = ">=3.11,<3.13"
+license = { text = "MIT" }
+dependencies = ["numpy>=1.26", "soundfile>=0.12", "pyyaml>=6"]
+
+[project.optional-dependencies]
+# Download public test sets (FLEURS, Kathbath, IndicVoices, Svarah, Lahaja...).
+data = ["datasets>=3.0", "huggingface_hub>=0.25", "librosa>=0.10"]
+# Voice the Pip Dictation Set with open Indic TTS (Indic Parler-TTS, Apache-2.0).
+tts = ["torch>=2.7", "parler-tts>=0.2", "transformers>=4.45", "scipy>=1.13"]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pip_eval"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

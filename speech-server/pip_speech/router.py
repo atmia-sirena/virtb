@@ -26,6 +26,8 @@ class Request:
     prior: str | None = None
     # Dictionary words and names on screen, to bias spellings.
     context: list[str] = field(default_factory=list)
+    # Force one engine (the eval bake-off); skips routing and the second opinion.
+    engine: str | None = None
 
 
 class Router:
@@ -68,7 +70,12 @@ class Router:
     # --- transcription ------------------------------------------------------
 
     def _run(self, engine_role: str, route: str, audio: np.ndarray, request: Request, exclude: set[str] | None = None) -> Transcript | None:
-        engine = self.registry.pick(route, engine_role, exclude)
+        if request.engine:
+            engine = self.registry.get(request.engine)
+            if engine is None:
+                raise RuntimeError(f"engine {request.engine} isn't usable: {self.registry.broken.get(request.engine, 'not installed')}")
+        else:
+            engine = self.registry.pick(route, engine_role, exclude)
         if engine is None:
             return None
         if engine.config.get("longAudio") or audio.size <= SAMPLE_RATE * 25:
@@ -126,7 +133,7 @@ class Router:
 
         # Unsure? Ask a second, different model and keep the more confident answer.
         threshold = float(self.settings.get("ensembleBelow", 0.6))
-        if result.confidence is not None and result.confidence < threshold:
+        if result.confidence is not None and result.confidence < threshold and not request.engine:
             mark = time.perf_counter()
             second = self._run("second", route, speech, request, exclude={result.model})
             timings["second"] = time.perf_counter() - mark

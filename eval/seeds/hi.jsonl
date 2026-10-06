@@ -1,0 +1,6 @@
+{"id": "000", "language": "hi", "spoken": "उम्म मैं कल आऊंगा नहीं नहीं परसों आऊंगा", "final": "मैं परसों आऊंगा", "tags": ["backtrack", "filler"]}
+{"id": "001", "language": "hi", "spoken": "धीरे धीरे चलो", "final": "धीरे धीरे चलो", "tags": []}
+{"id": "002", "language": "hi", "spoken": "पहला वाक्य पूर्ण विराम दूसरा वाक्य पिछला हटा दो", "final": "पहला वाक्य।", "tags": ["command"]}
+{"id": "003", "language": "hi", "spoken": "मैं कल आऊंगा पूर्ण विराम नई लाइन ठीक है", "final": "मैं कल आऊंगा।\nठीक है।", "tags": ["command"]}
+{"id": "004", "language": "hi", "spoken": "क्या आप कल फ्री हैं", "final": "क्या आप कल फ्री हैं?", "tags": []}
+{"id": "005", "language": "hi", "spoken": "मैं कल आऊंगा मतलब परसों आऊंगा", "final": "मैं परसों आऊंगा।", "tags": ["backtrack"]}

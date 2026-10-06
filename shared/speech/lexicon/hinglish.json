@@ -11,5 +11,6 @@
     "fullStop": ["poorn viram", "purn viram"],
     "question": ["sawaal ka nishaan", "prashn chinh"]
   },
-  "llmFillers": ["matlab", "toh", "haan toh", "woh", "ki", "na", "yaar", "basically", "like", "you know"]
+  "llmFillers": ["matlab", "toh", "haan toh", "woh", "ki", "na", "yaar", "basically", "like", "you know"],
+  "questionWords": ["kya", "kyun", "kyu", "kaise", "kab", "kahan", "kaha", "kaun", "kitna", "kitni", "kitne", "kaunsa", "kaunsi"]
 }

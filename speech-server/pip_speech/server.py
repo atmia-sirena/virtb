@@ -4,7 +4,7 @@ POST /sessions                 {languages, language?, prior?, context?} -> {sess
 POST /sessions/{id}/audio      raw PCM16 16 kHz mono -> {text, language}
 POST /sessions/{id}/finish     -> {text, words, language, confidence, model, timings}
 DELETE /sessions/{id}
-POST /transcribe?languages=..  WAV/FLAC body (or PCM16 with ?encoding=pcm_s16le) -> as finish
+POST /transcribe?languages=..  WAV/FLAC body (or PCM16 with ?encoding=pcm_s16le; ?engine= forces one model) -> as finish
 POST /lid                      WAV body -> {language, probabilities}
 POST /xlit                     {words, source} -> {words}
 GET  /health
@@ -110,7 +110,7 @@ def create_app(registry: Registry | None = None, warm: list[str] | None = None, 
     def parse_request(query: dict[str, str]) -> Request:
         languages = [code for code in query.get("languages", "en").split(",") if code]
         context = [term for term in query.get("context", "").split(",") if term]
-        return Request(languages=languages, language=query.get("language"), prior=query.get("prior"), context=context)
+        return Request(languages=languages, language=query.get("language"), prior=query.get("prior"), context=context, engine=query.get("engine"))
 
     @app.post("/transcribe")
     async def transcribe(request: HttpRequest) -> dict[str, Any]:
